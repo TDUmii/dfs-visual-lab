@@ -1,6 +1,6 @@
 "use strict";
 
-(function () {
+(() => {
   const MAP = [
     "....###",
     ".#####.",
@@ -8,169 +8,99 @@
     "##..#..",
     "......."
   ];
-  const DIRECTIONS = {
-    left: [0, -1],
-    right: [0, 1],
-    up: [-1, 0],
-    down: [1, 0]
-  };
-  const $ = (id) => document.getElementById(id);
-  let path = [[0, 0]];
-  let everVisited = new Set(["0:0"]);
-  let tries = 0;
-  let openedCode = false;
 
-  function neighbors(r, c) {
-    return Object.values(DIRECTIONS)
-      .map(([dr, dc]) => [r + dr, c + dc])
-      .filter(([nr, nc]) => nr >= 0 && nr < MAP.length &&
-         nc >= 0 && nc < MAP[0].length && MAP[nr][nc] === ".");
-  }
+  const wrongBranch = [[0,0],[0,1],[0,2],[0,3]];
+  const correctRoute = [
+    [0,0],[1,0],[2,0],[2,1],[2,2],[3,2],
+    [3,3],[4,3],[4,4],[4,5],[4,6]
+  ];
+  const PHASES = [
+    {
+      heading: "Nhánh đi sang phải bị chặn",
+      text: "DFS lần lượt đi đến (0,3). Ô này không còn đường hợp lệ: bên phải và bên dưới là tường, bên trên ra ngoài bảng, bên trái đã thăm.",
+      call: "dfs(0,3) → return False",
+      active: [0,3]
+    },
+    {
+      heading: "Quay về S để thử hướng còn lại",
+      text: "Từ (0,3), hàm trả False và trở về (0,2), rồi (0,1), rồi (0,0). Các ô cũ vẫn được đánh dấu. Tại S còn hướng xuống chưa thử.",
+      call: "dfs(0,2) → False  ·  dfs(0,1) → False",
+      active: [0,0]
+    },
+    {
+      heading: "Nhánh đi xuống tìm thấy E",
+      text: "DFS thử (1,0), (2,0), (2,1), (2,2), (3,2), (3,3) rồi theo hàng cuối tới E. Hàm tại E trả True và kết quả truyền ngược về S.",
+      call: "dfs(4,6) → True  ·  dfs(0,0) → True",
+      active: [4,6]
+    }
+  ];
+  const key = ([r,c]) => r + ":" + c;
+  const branch = new Set(wrongBranch.map(key));
+  const success = new Set(correctRoute.map(key));
+  const $ = id => document.getElementById(id);
 
-  function setStatus(message, type = "") {
-    const box = $("manualMessage");
-    box.textContent = message;
-    box.className = "try-message" + (type ? " status-" + type : "");
-  }
-
-  function renderManual() {
-    const board = $("manualBoard");
+  function renderPhase(index) {
+    const phase = PHASES[index] || PHASES[0];
+    const root = $("workedGrid");
     const fragment = document.createDocumentFragment();
-    const current = path[path.length - 1];
-    const visited = everVisited;
-    for (let r = 0; r < MAP.length; r++) {
-      for (let c = 0; c < MAP[r].length; c++) {
-        const cell = document.createElement("button");
-        cell.type = "button";
-        cell.className = "manual-cell";
-        cell.dataset.r = r;
-        cell.dataset.c = c;
-        cell.setAttribute("role", "gridcell");
-        const wall = MAP[r][c] === "#";
-        const start = r === 0 && c === 0;
-        const goal = r === 4 && c === 6;
-        const standing = current[0] === r && current[1] === c;
-        const used = visited.has(r + ":" + c);
-        if (wall) cell.classList.add("is-wall");
-        if (used) cell.classList.add("is-visited");
-        if (start) cell.classList.add("is-start");
-        if (goal) cell.classList.add("is-goal");
-        if (standing) cell.classList.add("is-player");
-        cell.setAttribute("aria-label",
-          "Hàng " + r + ", cột " + c + ": " +
-          (wall ? "tường" : goal ? "đích" : start ? "bắt đầu" : "ô trống") +
-          (standing ? ", bạn đang đứng ở đây" : ""));
-        if (goal) cell.textContent = "E";
-        else if (standing) cell.textContent = "●";
-        else if (start) cell.textContent = "S";
+    const corner = document.createElement("span");
+    corner.className = "worked-axis";
+    corner.setAttribute("aria-hidden","true");
+    fragment.appendChild(corner);
+
+    for (let c=0;c<7;c++) {
+      const col=document.createElement("span");
+      col.className="worked-axis";
+      col.textContent=c;
+      col.setAttribute("aria-hidden","true");
+      fragment.appendChild(col);
+    }
+    for (let r=0;r<5;r++) {
+      const row=document.createElement("span");
+      row.className="worked-axis";
+      row.textContent=r;
+      row.setAttribute("aria-hidden","true");
+      fragment.appendChild(row);
+      for (let c=0;c<7;c++) {
+        const cell=document.createElement("span");
+        const at=r+":"+c;
+        cell.className="worked-cell";
+        if (MAP[r][c]==="#") cell.classList.add("is-wall");
+        if (index<2 && branch.has(at)) cell.classList.add(index===0?"is-branch":"is-past");
+        if (index===2 && branch.has(at) && !success.has(at)) cell.classList.add("is-past");
+        if (index===2 && success.has(at)) cell.classList.add("is-success");
+        if (r===phase.active[0]&&c===phase.active[1]) cell.classList.add("is-active");
+        if (r===0&&c===0){cell.classList.add("is-start");cell.textContent="S";}
+        if (r===4&&c===6){cell.classList.add("is-goal");cell.textContent="E";}
         fragment.appendChild(cell);
       }
     }
-    board.replaceChildren(fragment);
-    $("manualBackBtn").disabled = path.length <= 1;
-  }
-
-  function step(r, c) {
-    const [currentR, currentC] = path[path.length - 1];
-    if (Math.abs(currentR - r) + Math.abs(currentC - c) !== 1) {
-      setStatus("Bạn chỉ được đi sang một ô ngay bên cạnh.", "warning");
-      return;
-    }
-    if (!(r >= 0 && r < MAP.length && c >= 0 && c < MAP[0].length) ||
-        MAP[r][c] === "#") {
-      setStatus("Đường bị chặn! Hãy chọn lối khác.", "warning");
-      return;
-    }
-    if (path.length > 1) {
-      const previous = path[path.length - 2];
-      if (previous[0] === r && previous[1] === c) {
-        goBack();
-        return;
-      }
-    }
-    if (everVisited.has(r + ":" + c)) {
-      setStatus("Bạn đã qua ô này. Hãy thử hướng khác để khỏi đi vòng.", "warning");
-      return;
-    }
-    path.push([r, c]);
-    everVisited.add(r + ":" + c);
-    tries++;
-    renderManual();
-    if (r === 4 && c === 6) {
-      setStatus("Bạn đã tới E! Với mê cung nhiều nhánh, máy cũng cần cách thử có hệ thống.", "success");
-      return;
-    }
-    const available = neighbors(r, c).filter(([nr, nc]) =>
-      !everVisited.has(nr + ":" + nc));
-    if (!available.length) {
-      setStatus("Bạn gặp ngõ cụt rồi! Nhấn Quay lại. DFS cũng làm đúng như vậy.", "deadend");
-    } else {
-      setStatus("Bạn đi được " + tries + " bước. Nếu đi hết đường, hãy quay về và thử nhánh khác.");
-    }
-  }
-
-  function goBack() {
-    if (path.length <= 1) {
-      setStatus("Bạn đang ở S. Hãy thử một lối mới.");
-      return;
-    }
-    path.pop();
-    renderManual();
-    setStatus("Đã quay lại! Ô cũ vẫn được đánh dấu để không đi vòng. DFS cũng ghi nhớ như thế.", "backtracked");
-  }
-
-  function reset() {
-    path = [[0, 0]];
-    everVisited = new Set(["0:0"]);
-    tries = 0;
-    renderManual();
-    setStatus("Hãy thử đi sang phải. Điều gì xảy ra nếu gặp ngõ cụt?");
-  }
-
-  function directionPress(name) {
-    const [dr, dc] = DIRECTIONS[name];
-    const [r, c] = path[path.length - 1];
-    step(r + dr, c + dc);
-  }
-
-  function goToDemo() {
-    document.getElementById("directionSelect").value = "right,down,left,up";
-    loadPreset("starter");
-    showView("lab", true);
-    setMobilePanel("map");
-    const speed = $("speedSlider");
-    if (speed) speed.value = "2";
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      if (!state.isPlaying) startPlayback();
-    }));
-  }
-
-  function init() {
-    reset();
-    $("presetMobile").addEventListener("change", (event) => {
-      loadPreset(event.target.value);
-    });
-    $("manualBoard").addEventListener("click", (e) => {
-      const cell = e.target.closest(".manual-cell");
-      if (cell) step(Number(cell.dataset.r), Number(cell.dataset.c));
-    });
-    document.querySelectorAll("[data-manual-dir]").forEach(button => {
-      button.addEventListener("click", () => directionPress(button.dataset.manualDir));
-    });
-    $("manualBackBtn").addEventListener("click", goBack);
-    $("manualResetBtn").addEventListener("click", reset);
-    $("watchDfsBtn").addEventListener("click", goToDemo);
-    $("watchDfsQuickBtn").addEventListener("click", goToDemo);
-    document.addEventListener("keydown", (event) => {
-      if (activeView !== "learn" || event.altKey || event.ctrlKey || event.metaKey) return;
-      const activeTag = document.activeElement?.tagName || "";
-      if (activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT") return;
-      const names = {ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};
-      if (names[event.key]) {
-        event.preventDefault();
-        directionPress(names[event.key]);
-      }
+    root.replaceChildren(fragment);
+    root.setAttribute("aria-label",phase.heading+". "+phase.text);
+    $("workedStepCount").textContent="TRẠNG THÁI "+(index+1)+" / 3";
+    $("workedHeading").textContent=phase.heading;
+    $("workedExplanation").textContent=phase.text;
+    $("workedCall").textContent=phase.call;
+    document.querySelectorAll("[data-example-phase]").forEach(button=>{
+      const on=Number(button.dataset.examplePhase)===index;
+      button.classList.toggle("active",on);
+      button.setAttribute("aria-pressed",String(on));
     });
   }
-  document.addEventListener("DOMContentLoaded", init);
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    renderPhase(0);
+    document.querySelectorAll("[data-example-phase]").forEach(button=>
+      button.addEventListener("click",()=>renderPhase(Number(button.dataset.examplePhase))));
+
+    $("presetMobile")?.addEventListener("change",event=>loadPreset(event.target.value));
+
+    $("lessonCodeBtn")?.addEventListener("click",()=>{
+      loadPreset("starter");
+      showView("lab",true);
+      window.DFSCode?.setMode("build");
+      if (window.innerWidth<=1050) setMobilePanel("code");
+      else window.DFSInspector?.select("code");
+    });
+  });
 })();
