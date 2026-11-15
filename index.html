@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="lesson-v5.css">
   <link rel="stylesheet" href="refine-v6.css">
   <link rel="stylesheet" href="foundations-v7.css">
+  <link rel="stylesheet" href="code-viewport-v8.css">
   <script defer src="code-languages.js"></script>
   <script defer src="app.js"></script>
   <script defer src="lesson-v5.js"></script>
@@ -132,38 +133,41 @@
             <strong>Xem code khi đã hiểu cách đi</strong>
             <button type="button" class="code-toggle" id="showCodePanelBtn" aria-controls="codeDetails" aria-expanded="false">Mở code</button>
           </div>
-          <div class="code-details" id="codeDetails" hidden>
-            <div class="code-mode-switch" role="group" aria-label="Cách học code">
-              <button type="button" class="active" data-code-mode="build" aria-pressed="true"><svg class="ui-icon"><use href="#ic-layers"></use></svg>Xây từng phần</button>
-              <button type="button" data-code-mode="run" aria-pressed="false"><svg class="ui-icon"><use href="#ic-play"></use></svg>Code đang chạy</button>
+          <div class="code-details" id="codeDetails" hidden data-code-mode="build">
+            <div class="code-toolbar">
+              <div class="code-mode-switch" role="group" aria-label="Cách học code">
+                <button type="button" class="active" data-code-mode="build" aria-pressed="true"><svg class="ui-icon"><use href="#ic-layers"></use></svg>Xây từng phần</button>
+                <button type="button" data-code-mode="run" aria-pressed="false"><svg class="ui-icon"><use href="#ic-play"></use></svg>Code đang chạy</button>
+              </div>
+              <div class="language-switch" role="group" aria-label="Ngôn ngữ lập trình">
+                <button type="button" data-language="python" class="active" aria-pressed="true">Python</button>
+                <button type="button" data-language="cpp" aria-pressed="false">C++</button>
+              </div>
+              <div class="code-action-buttons">
+                <button type="button" id="codeViewBtn" aria-expanded="false" aria-controls="pseudoCode">Code đầy đủ</button>
+                <button type="button" id="copyCodeBtn"><svg class="ui-icon"><use href="#ic-copy"></use></svg>Sao chép</button>
+                <button type="button" id="expandCodeBtn" aria-pressed="false" title="Mở rộng vùng code" aria-label="Mở rộng vùng code"><svg class="ui-icon"><use href="#ic-terminal"></use></svg><span>Mở rộng</span></button>
+              </div>
             </div>
             <section class="code-teaching-card" aria-live="polite">
-              <div class="code-teach-top"><span id="codeStageCounter">Phần 1 / 6</span><span id="codeCurrentContext">DFS bắt đầu từ S</span></div>
+              <div class="code-teach-top">
+                <span id="codeStageCounter">Phần 1 / 6</span>
+                <span id="codeCurrentContext">DFS bắt đầu từ S</span>
+              </div>
               <h3 id="codeStageTitle">Đầu tiên cần một hàm</h3>
               <p id="codeStageExplanation">Nhận hàng và cột của ô muốn xét.</p>
               <div class="code-stage-navigation">
-                <button type="button" id="codePrevStage" aria-label="Phần code trước"><svg class="ui-icon"><use href="#ic-back"></use></svg>Trước</button>
+                <button type="button" id="codePrevStage"><svg class="ui-icon"><use href="#ic-back"></use></svg>Trước</button>
                 <button type="button" id="codeNextStage">Thêm phần tiếp <svg class="ui-icon"><use href="#ic-arrow"></use></svg></button>
               </div>
             </section>
-            <div class="code-workbench-head">
-              <strong id="codeWorkbenchLabel">Từng dòng sẽ được thêm bên dưới</strong>
-              <span class="code-file-label" id="codeFileLabel">dfs.py</span>
+            <div class="code-file-strip">
+              <span id="codeWorkbenchLabel">Dòng code được tô sáng theo bước DFS</span>
+              <span id="codeFileLabel">dfs.py</span>
             </div>
-            <div class="language-switch" role="group" aria-label="Ngôn ngữ lập trình">
-              <button type="button" data-language="python" class="active" aria-pressed="true">Python</button>
-              <button type="button" data-language="cpp" aria-pressed="false">C++</button>
-            </div>
-
-          <div class="code-actions-row">
-            <span id="codeHint">Dòng sáng ứng với bước DFS</span>
-            <div class="code-action-buttons">
-              <button type="button" id="codeViewBtn" aria-expanded="false" aria-controls="pseudoCode">Toàn bộ</button>
-              <button type="button" id="copyCodeBtn">Sao chép</button>
-            </div>
-          </div>
-          <div id="pseudoCode" class="code-box" role="region" aria-label="Mã DFS Python hoặc C++" tabindex="0"></div>
-          <div class="code-line-note" id="codeLineNote">Nhấn vào một dòng code để xem tại sao cần dòng đó.</div>
+            <div id="pseudoCode" class="code-box" role="region" aria-label="Mã DFS Python hoặc C++" tabindex="0"></div>
+            <span class="visually-hidden" id="codeHint">Theo dõi mã DFS từng bước</span>
+            <div class="code-line-note visually-hidden" id="codeLineNote" aria-live="polite"></div>
           </div>
           <p class="tiny-hint">Tím: nhánh đang thử. Xám: nhánh đã quay lui.</p>
           <div id="resultBox" class="result" hidden></div>

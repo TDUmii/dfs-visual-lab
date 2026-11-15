@@ -1,22 +1,29 @@
 # DFS Lab
 
-Website học DFS trên ma trận 2 chiều bằng tiếng Việt.
+Trang học DFS trên ma trận 2 chiều bằng tiếng Việt.
 
 Website: https://dfs-visual-lab.vercel.app/
 
-## Nội dung bài học
+## Nội dung
 
-- **Lý thuyết:** DFS là gì, vì sao cần đánh dấu ô đã thăm, biểu diễn mê cung bằng ma trận, tọa độ 4 hướng, điều kiện dừng, đệ quy và quay lui. Ví dụ 5 × 7 minh họa ngõ cụt, quay lui và đường tới đích trên cùng một bản đồ.
-- **Xem DFS:** mô phỏng từng bước, giải thích vì sao chọn một ô, đánh dấu hay quay lui.
-- **Học viết code:** chế độ xây hàm DFS qua 6 phần, giải thích từng dòng, Python và C++. Chế độ code đang chạy tô dòng đang thực hiện; có chương trình đầy đủ để sao chép.
-- **Ứng dụng:** mê cung, flood fill và đếm vùng liên thông.
-- **Bài tập:** dự đoán bước, chặn đường, đếm vùng.
+- Lý thuyết: bài toán tìm đường, quy tắc 4 hướng, mảng đã thăm, đệ quy, quay lui, độ phức tạp và ba trạng thái minh họa.
+- Xem DFS: mô phỏng các lựa chọn, ô đã thăm, đường đang đi và nhánh quay lui.
+- Học viết code: xây từng phần hoặc xem code chạy, tô dòng tương ứng, giải thích từng dòng, hỗ trợ Python và C++.
+- Ứng dụng: tìm đường, loang màu và đếm vùng liên thông.
+- Bài tập: dự đoán bước, chặn đường và đếm vùng.
 
-Giao diện thích ứng máy tính, điện thoại và sử dụng icon SVG, font hỗ trợ tiếng Việt.
+## Không gian code
 
-## Chạy tại máy
+- Khi mở Học viết code, bản đồ thu về khoảng 39% chiều ngang và panel code mở rộng tới khoảng 61% trên desktop.
+- Trong chế độ Code đang chạy, giải thích thu gọn thành một thanh trạng thái; phần code chiếm toàn bộ diện tích còn lại.
+- Nút Mở rộng ẩn bản đồ và cho code toàn bộ chiều ngang; Thu gọn khôi phục ma trận.
+- Bên trong code có thanh cuộn riêng, tự theo dòng được tô sáng; vùng điều khiển DFS không bị đẩy khỏi màn hình.
+- Trên điện thoại, tab Code chiếm trọn vùng làm việc và hỗ trợ Python/C++.
+- Nút Code đầy đủ hiển thị chương trình hoàn chỉnh; Sao chép xuất mã chạy được.
 
-Mở index.html hoặc chạy:
+## Chạy
+
+Mở index.html trong trình duyệt hoặc chạy:
 
     python -m http.server 8080
 
@@ -26,12 +33,11 @@ Mở index.html hoặc chạy:
     node test-v5.cjs
     node qa-v6.cjs
     node qa-v7.cjs
+    node qa-v8.cjs
 
-qa-v6 và qa-v7 sử dụng Chrome headless trên máy Windows.
+Kiểm thử giao diện sử dụng Chrome headless trên Windows, không chiếm chuột/bàn phím.
 
 ## Tham khảo
 
 - VisuAlgo: https://visualgo.net/en/dfsbfs
 - CMU Search in Graphs: https://www.cs.cmu.edu/~15122/handouts/lectures/24-dfs.pdf
-
-Mô phỏng và mã nguồn được phát triển riêng cho DFS Lab.

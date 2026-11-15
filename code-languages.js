@@ -299,10 +299,15 @@
     });
     stageDetail();
     if (active && codeMode === "run") {
-      const scrollTop = active.offsetTop;
-      if (scrollTop < box.scrollTop + 8 || scrollTop + active.offsetHeight > box.scrollTop + box.clientHeight - 8) {
-        box.scrollTop = Math.max(0,scrollTop - box.clientHeight * 0.32);
+      const editorRect = box.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      const targetTop = activeRect.top - editorRect.top + box.scrollTop;
+      const visibleTop = box.scrollTop + 22;
+      const visibleBottom = box.scrollTop + box.clientHeight - 26;
+      if (targetTop < visibleTop || targetTop + active.offsetHeight > visibleBottom) {
+        box.scrollTop = Math.max(0, targetTop - box.clientHeight * 0.35);
       }
+      if (box.scrollLeft > 0 && box.clientWidth >= 200) box.scrollLeft = 0;
     }
   }
 
@@ -323,6 +328,8 @@
 
   function setMode(mode) {
     codeMode = mode === "run" ? "run" : "build";
+    const details = $("codeDetails");
+    if (details) details.dataset.codeMode = codeMode;
     document.querySelectorAll("[data-code-mode]").forEach(btn=>{
       const on = btn.dataset.codeMode === codeMode;
       btn.classList.toggle("active",on);

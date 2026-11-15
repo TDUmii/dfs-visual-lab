@@ -1,0 +1,352 @@
+/* V8: Code-first inspector. Fixed-height panels, independently scrollable editor. */
+.visually-hidden {
+  position:absolute!important; width:1px!important; height:1px!important;
+  padding:0!important; margin:-1px!important; overflow:hidden!important;
+  clip-path:inset(50%)!important; white-space:nowrap!important; border:0!important;
+}
+body.screen-layout .workspace.code-focus {
+  grid-template-columns:minmax(0, .39fr) minmax(0, .61fr)!important;
+}
+body.screen-layout .workspace.code-focus.is-code-expanded {
+  grid-template-columns:minmax(0,1fr)!important;
+}
+body.screen-layout .workspace.code-focus.is-code-expanded > .map-column {
+  display:none!important;
+}
+body.screen-layout .workspace.code-focus.is-code-expanded > .info-column {
+  grid-column:1!important; border:0!important;
+}
+body.screen-layout #inspectorPanel.code-pane-active {
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  padding:11px 13px 10px!important;
+}
+body.screen-layout #inspectorPanel.code-pane-active .inspector-tabs {
+  margin:0 0 8px!important;
+  flex:0 0 auto!important;
+}
+body.screen-layout #inspectorPanel.code-pane-active #codeDetails {
+  display:flex!important;
+  flex:1 1 0!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  min-width:0!important;
+  height:auto!important;
+  overflow:hidden!important;
+  padding:0!important;
+  gap:7px!important;
+}
+body.screen-layout #codeDetails[hidden] {display:none!important}
+body.screen-layout #codeDetails > .code-toolbar {
+  display:flex!important;
+  flex:none!important;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px 8px;
+  min-width:0;
+  margin:0!important;
+  padding:0!important;
+}
+body.screen-layout #codeDetails .code-toolbar .code-mode-switch {
+  flex:1 1 225px;
+  width:auto;
+  min-width:185px;
+  margin:0!important;
+  grid-area:auto!important;
+  grid-row:auto!important;
+  grid-column:auto!important;
+  padding:3px!important;
+}
+body.screen-layout #codeDetails .code-toolbar .code-mode-switch button {
+  min-height:39px;
+  font-size:12.5px;
+  gap:5px;
+  padding:7px 6px;
+}
+body.screen-layout #codeDetails .code-toolbar .language-switch {
+  flex:0 0 auto!important;
+  grid-area:auto!important;
+  grid-row:auto!important;
+  grid-column:auto!important;
+  min-height:42px;
+  align-self:center!important;
+  margin:0!important;
+  padding:3px!important;
+}
+body.screen-layout #codeDetails .code-toolbar .language-switch button {
+  min-width:62px;
+  min-height:34px;
+  font-size:12px;
+  padding:5px 7px;
+}
+body.screen-layout #codeDetails .code-toolbar .code-action-buttons {
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin:0 0 0 auto;
+}
+body.screen-layout #codeDetails .code-toolbar .code-action-buttons button {
+  background:#f0f6ef;
+  border:1px solid #d4e3d5;
+  color:#287351;
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  min-height:40px;
+  font-size:11.5px;
+  font-weight:750;
+  padding:7px 10px;
+  border-radius:8px;
+  white-space:nowrap;
+}
+body.screen-layout #codeDetails .code-toolbar .code-action-buttons #copyCodeBtn {
+  background:#176e54;
+  border-color:#176e54;
+  color:white;
+}
+body.screen-layout #codeDetails .code-toolbar .code-action-buttons button:hover {
+  filter:brightness(.97);
+}
+body.screen-layout #codeDetails .code-toolbar .code-action-buttons .ui-icon {
+  width:15px; height:15px;
+}
+body.screen-layout #codeDetails .code-teaching-card {
+  grid-area:auto!important;
+  grid-row:auto!important;
+  grid-column:auto!important;
+  flex:0 0 auto!important;
+  min-height:0!important;
+  padding:9px 12px!important;
+  margin:0!important;
+}
+body.screen-layout #codeDetails .code-teaching-card h3 {
+  margin:4px 0!important;
+  line-height:1.35!important;
+  font-size:15px!important;
+}
+body.screen-layout #codeDetails .code-teaching-card p {
+  margin:0!important;
+  line-height:1.43!important;
+  font-size:12.2px!important;
+}
+body.screen-layout #codeDetails .code-teach-top {
+  gap:5px;
+  line-height:1.25;
+}
+body.screen-layout #codeDetails .code-stage-navigation {
+  margin-top:7px!important;
+  gap:7px;
+}
+body.screen-layout #codeDetails .code-stage-navigation button {
+  min-height:36px!important;
+  padding:6px 10px!important;
+  font-size:11.5px!important;
+}
+body.screen-layout #codeDetails[data-code-mode="run"] .code-teaching-card {
+  display:grid!important;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:3px 12px;
+  background:#ebf5ed;
+}
+body.screen-layout #codeDetails[data-code-mode="run"] .code-teach-top {
+  grid-column:1;
+  grid-row:1 / 3;
+  display:flex!important;
+  flex-direction:column;
+  gap:5px;
+  align-items:flex-start;
+}
+body.screen-layout #codeDetails[data-code-mode="run"] #codeCurrentContext {
+  display:block!important;
+  font-size:11px;
+}
+body.screen-layout #codeDetails[data-code-mode="run"] #codeStageTitle {
+  grid-row:1;
+  grid-column:2;
+  margin:0!important;
+  font-size:13.5px!important;
+  letter-spacing:0;
+}
+body.screen-layout #codeDetails[data-code-mode="run"] #codeStageExplanation {
+  grid-row:2;
+  grid-column:2;
+  max-width:none;
+  font-size:11.5px!important;
+  line-height:1.35!important;
+}
+body.screen-layout #codeDetails[data-code-mode="run"] .code-stage-navigation {
+  display:none!important;
+}
+body.screen-layout #codeDetails .code-file-strip {
+  grid-area:auto!important;
+  grid-row:auto!important;
+  grid-column:auto!important;
+  display:flex!important;
+  justify-content:space-between;
+  align-items:center;
+  gap:7px;
+  min-height:22px;
+  flex:0 0 auto!important;
+  padding:0 2px;
+  color:#607a69;
+  font-size:11.5px;
+  font-weight:650;
+}
+body.screen-layout #codeDetails .code-file-strip #codeFileLabel {
+  font-family:Consolas,"Courier New",monospace!important;
+  font-weight:750;
+  color:#22694b;
+}
+body.screen-layout #codeDetails #pseudoCode {
+  grid-area:auto!important;
+  grid-row:auto!important;
+  grid-column:auto!important;
+  display:block!important;
+  flex:1 1 0!important;
+  min-height:0!important;
+  height:0!important;
+  max-height:none!important;
+  width:100%!important;
+  overflow:auto!important;
+  overscroll-behavior:contain;
+  scroll-behavior:auto;
+  padding:12px 0!important;
+  margin:0!important;
+  font-size:15px!important;
+  line-height:1.55!important;
+  border-radius:10px;
+  background:#202e30;
+}
+body.screen-layout #codeDetails #pseudoCode .code-row {
+  min-height:26px;
+  padding:3px 14px 3px 8px!important;
+  line-height:1.6!important;
+  scroll-margin:45px;
+}
+body.screen-layout #codeDetails #pseudoCode .code-row code {
+  font-size:14.5px!important;
+  white-space:pre!important;
+  line-height:1.6!important;
+}
+body.screen-layout #codeDetails #pseudoCode .code-row.current {
+  background:#375c4b!important;
+  border-left:4px solid #b7f3bf!important;
+}
+@media(max-width:1200px) and (min-width:1051px) {
+  body.screen-layout .workspace.code-focus {
+    grid-template-columns:minmax(0,.36fr) minmax(0,.64fr)!important;
+  }
+  body.screen-layout #codeDetails .code-toolbar .code-mode-switch {
+    flex-basis:190px;
+  }
+}
+@media(max-width:1050px) {
+  body.screen-layout .workspace.code-focus,
+  body.screen-layout .workspace.code-focus.is-code-expanded {
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  body.screen-layout #codeDetails .code-toolbar #expandCodeBtn {display:none!important}
+}
+@media(max-width:750px) {
+  body.screen-layout #inspectorPanel.code-pane-active {
+    padding:8px 9px!important;
+  }
+  body.screen-layout #codeDetails {
+    gap:5px!important;
+  }
+  body.screen-layout #codeDetails .code-toolbar {
+    gap:5px!important;
+  }
+  body.screen-layout #codeDetails .code-toolbar .code-mode-switch{
+    min-width:100%;
+    flex:1 1 100%;
+  }
+  body.screen-layout #codeDetails .code-toolbar .language-switch {
+    min-height:39px;
+  }
+  body.screen-layout #codeDetails .code-toolbar .code-action-buttons button{
+    min-height:37px;
+    font-size:10.8px;
+    padding:6px 8px;
+  }
+  body.screen-layout #codeDetails .code-teaching-card{padding:8px 10px!important}
+  body.screen-layout #codeDetails[data-code-mode="run"] .code-teaching-card {
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:4px!important;
+  }
+  body.screen-layout #codeDetails[data-code-mode="run"] .code-teach-top {
+    flex-direction:row;
+    gap:8px;
+  }
+  body.screen-layout #codeDetails[data-code-mode="run"] #codeStageTitle{
+    font-size:12.5px!important;
+  }
+  body.screen-layout #codeDetails[data-code-mode="run"] #codeStageExplanation{
+    font-size:11.4px!important;
+    line-height:1.4!important;
+  }
+  body.screen-layout #codeDetails[data-code-mode="run"] .code-stage-navigation{
+    display:flex!important;
+  }
+  body.screen-layout #codeDetails .code-file-strip {
+    font-size:10.5px;
+    min-height:18px;
+  }
+  body.screen-layout #codeDetails #pseudoCode{
+    font-size:14px!important;
+  }
+  body.screen-layout #codeDetails #pseudoCode .code-row code{
+    font-size:13.5px!important;
+    white-space:pre-wrap!important;
+    overflow-wrap:anywhere!important;
+  }
+  body.screen-layout #codeDetails #pseudoCode .code-row{
+    min-width:0!important;
+    width:100%;
+  }
+}
+@media(max-width:360px) {
+  body.screen-layout #codeDetails .code-toolbar .code-action-buttons button{
+    font-size:10px;
+    padding:6px;
+  }
+  body.screen-layout #codeDetails .code-toolbar .code-action-buttons #copyCodeBtn .ui-icon{display:none}
+  body.screen-layout #codeDetails .code-file-strip{display:none!important}
+}
+
+/* V8.1: spend every spare vertical pixel on source code. */
+body.screen-layout #lab:has(.workspace.code-focus) > .lab-purpose {
+  display:none!important;
+}
+body.screen-layout #inspectorPanel.code-pane-active .inspector-tabs {
+  margin-bottom:5px!important;
+  padding:3px!important;
+}
+body.screen-layout #inspectorPanel.code-pane-active .inspector-tabs button {
+  min-height:38px!important;
+  padding:6px!important;
+}
+body.screen-layout #codeDetails[data-code-mode="run"] .code-file-strip {
+  display:none!important;
+}
+body.screen-layout #codeDetails[data-code-mode="run"] .code-teaching-card {
+  padding:7px 10px!important;
+}
+body.screen-layout #codeDetails[data-code-mode="run"] .code-teaching-card h3 {
+  font-size:13px!important;
+}
+body.screen-layout #codeDetails[data-code-mode="run"] .code-teaching-card p {
+  line-height:1.25!important;
+}
+@media(max-width:750px) {
+ body.screen-layout #codeDetails[data-code-mode="run"] .code-file-strip {
+   display:none!important;
+ }
+}

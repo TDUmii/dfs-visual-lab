@@ -11,6 +11,16 @@
     if (!panel) return;
     panel.classList.toggle("code-pane-active", showCode);
     panel.classList.toggle("has-code", showCode);
+    const workspace = document.querySelector(".workspace");
+    if (workspace) {
+      workspace.classList.toggle("code-focus", showCode);
+      if (!showCode) workspace.classList.remove("is-code-expanded");
+    }
+    const expandBtn = $("expandCodeBtn");
+    if (expandBtn && !showCode) {
+      expandBtn.setAttribute("aria-pressed", "false");
+      expandBtn.querySelector("span").textContent = "Mở rộng";
+    }
     const details = $("codeDetails");
     if (details) details.hidden = !showCode;
     const oldButton = $("showCodePanelBtn");
@@ -41,6 +51,15 @@
       btn.addEventListener("click", () => select(btn.dataset.inspectorTab));
     });
     $("showCodePanelBtn")?.addEventListener("click", () => select("code"));
+    $("expandCodeBtn")?.addEventListener("click", () => {
+      const workspace = document.querySelector(".workspace");
+      if (!workspace) return;
+      const expanded = workspace.classList.toggle("is-code-expanded");
+      $("expandCodeBtn").setAttribute("aria-pressed", String(expanded));
+      $("expandCodeBtn").setAttribute("aria-label", expanded ? "Thu gọn vùng code" : "Mở rộng vùng code");
+      $("expandCodeBtn").querySelector("span").textContent = expanded ? "Thu gọn" : "Mở rộng";
+      requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    });
     window.DFSInspector = {select, getMode: () => inspectorMode};
     select("explain");
   }
