@@ -1,0 +1,368 @@
+/* DFS Lab V5 - teach the problem first, then the algorithm. */
+:root {
+  --v5-ink: #1d302b;
+  --v5-muted: #52665f;
+  --v5-border: #d9e5da;
+  --v5-surface: #fffefb;
+  --v5-deep: #175948;
+  --v5-mint: #e4f4e8;
+}
+html{scroll-behavior:auto}
+body{background:#f5f8f2;color:var(--v5-ink)}
+body.screen-layout .site-head{height:55px;background:#fffefb}
+body.screen-layout .head-row{height:55px}
+body.screen-layout main>.shell{height:calc(100dvh - 55px);width:min(1400px,calc(100% - 28px))}
+body.screen-layout .view-tabs{gap:6px;padding:5px;margin:10px 0 10px;min-height:52px;background:#eaf1e9}
+body.screen-layout .view-tab{
+  flex:0 1 auto;
+  min-height:40px;
+  font-size:13px;
+  padding:10px 18px;
+  font-weight:800;
+  letter-spacing:-.08px;
+}
+body.screen-layout .view-tab.active{background:#fff;box-shadow:0 2px 9px #1f544613}
+body.screen-layout [data-view-panel]{scrollbar-width:thin;scrollbar-color:#b6cfbf transparent;overscroll-behavior-y:contain}
+body.screen-layout [data-view-panel="learn"]{padding-bottom:11px}
+
+/* New first lesson */
+.journey-section{display:flex;flex-direction:column;gap:12px;min-height:0}
+.journey-layout{display:grid;grid-template-columns:minmax(0, .98fr) minmax(0,1.02fr);gap:18px;align-items:stretch;min-height:0;flex:1}
+.journey-story,.try-card{
+  background:var(--v5-surface);
+  border:1px solid var(--v5-border);
+  border-radius:18px;
+  padding:clamp(18px,2.4vw,32px);
+  box-shadow:0 12px 36px #244b2d08;
+  min-width:0;
+}
+.journey-story{display:flex;flex-direction:column;align-items:flex-start}
+.journey-eyebrow,.mini-kicker{font-size:11px;font-weight:800;letter-spacing:1.35px;color:#26836a}
+.journey-story h1{font-size:clamp(29px,3.0vw,44px);line-height:1.16;letter-spacing:-1.7px;margin:16px 0 14px;color:#1e3028}
+.journey-story h1 span{color:#148463}
+.journey-story>p{font-size:clamp(14px,1.08vw,16px);color:#52665d;line-height:1.68}
+.journey-story>p strong{color:#1e3e33}
+.why-question{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:18px;margin:22px 0 13px;
+  background:#eef6e9;border:1px solid #d5e6d5;border-radius:13px;width:100%;
+}
+.why-symbol{
+  display:grid;place-items:center;flex:0 0 38px;
+  width:38px;height:38px;background:#d2e8d2;border-radius:11px;
+  color:#287354;font-size:23px;font-weight:800;
+}
+.why-question strong{font-size:clamp(14px,1.13vw,17px);line-height:1.45;display:block}
+.why-question p{margin-top:6px;font-size:14px;color:#50685a;line-height:1.6}
+.journey-story .why-answer{font-size:14.5px;line-height:1.6}
+.journey-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;width:100%;margin:19px 0 22px}
+.journey-steps>div{padding:12px 8px;border-radius:11px;background:#f4f7f2;border:1px solid #e2e9e0;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.step-pictogram{height:28px;width:28px;display:grid;place-items:center;border-radius:8px;font-weight:800;font-size:20px;margin-bottom:5px}
+.step-green{background:#d0eede;color:#188259}
+.step-blue{background:#e1e8ff;color:#5265bf}
+.step-amber{background:#ffedcb;color:#aa7417}
+.journey-steps b{font-size:12px;color:#2b4439;white-space:normal;line-height:1.4}
+.journey-steps small{font-size:11px;color:#728477;line-height:1.35}
+.journey-cta{
+  min-height:52px;width:100%;background:#167a5d;color:white;border:0;
+  border-radius:11px;padding:12px 19px;font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  box-shadow:0 7px 20px #167a5d23;transition:background .12s,transform .12s;
+  margin-top:auto;
+}
+.journey-cta:hover{background:#105d47;transform:translateY(-1px)}
+.journey-cta span{font-size:24px;line-height:1}
+.journey-footnote{font-size:12px!important;color:#82938a!important;margin:10px 0 0}
+.learn-footer{
+  display:flex;justify-content:center;gap:26px;align-items:center;flex-wrap:wrap;
+  background:#ebf2e8;border:1px solid #dce8d9;border-radius:12px;
+  padding:12px 15px;font-size:12px;color:#506d60;
+}
+.learn-footer strong{color:#246e54}
+
+/* Manual maze exercise */
+.try-card{display:flex;flex-direction:column;background:#fff}
+.try-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:13px}
+.try-head h2{margin:6px 0 0;font-size:clamp(18px,1.65vw,24px);color:#243b32}
+.try-tag{white-space:nowrap;background:#e5f4e9;color:#287451;border-radius:8px;padding:9px 11px;font-size:12px;font-weight:800}
+.try-body{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:16px;background:#f3f6ee;border:1px solid #e2e9de;border-radius:13px;padding:18px}
+.manual-board{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;width:min(100%,480px);user-select:none}
+.manual-cell{
+  aspect-ratio:1;min-width:0;border:2px solid #d5e4d7;border-radius:10px;
+  background:#fff;color:#236a55;font-size:20px;font-weight:800;
+  display:grid;place-items:center;touch-action:manipulation;
+  transition:background .12s,box-shadow .12s,transform .12s;
+}
+.manual-cell:not(.is-wall):hover{border-color:#5db88a;transform:scale(1.02)}
+.manual-cell.is-wall{background:#334e4a;border-color:#334e4a;cursor:not-allowed}
+.manual-cell.is-start{background:#b9e9d0;border-color:#8ddab0}
+.manual-cell.is-visited{background:#dfece3;border-color:#a9d6b5}
+.manual-cell.is-goal{background:#ffcf8a;border-color:#efbb6d;color:#764511}
+.manual-cell.is-player{background:#0f9975;border-color:#05785a;color:white;box-shadow:0 0 0 4px #17aa8726}
+.try-message{min-height:53px;text-align:center;font-weight:700;font-size:13px;line-height:1.5;color:#527366;max-width:490px;display:flex;align-items:center;justify-content:center}
+.try-message.status-warning{color:#af6b17}
+.try-message.status-deadend{color:#ac6430;background:#fff2db;border-radius:10px;padding:8px}
+.try-message.status-success{color:#126b4f;background:#d9f5e5;border-radius:10px;padding:8px}
+.try-message.status-backtracked{color:#6655b4}
+.try-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;flex-wrap:wrap}
+.arrow-pad{display:flex;align-items:center;gap:7px}
+.arrow-pad button,.try-secondary button{
+  height:47px;min-width:47px;border-radius:10px;background:#f1f7f0;border:1px solid #d3e5d3;
+  font-size:23px;font-weight:800;color:#2b6853;
+}
+.arrow-pad button:hover,.try-secondary button:hover{background:#dbf0df}
+.try-secondary{display:flex;gap:8px}
+.try-secondary button{padding:0 14px;font-size:13px;white-space:nowrap}
+.try-secondary button:disabled{opacity:.35}
+button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #4f9e79;outline-offset:3px}
+
+/* Simulation should explain the choice, not bury it in code */
+body.screen-layout .lab-purpose{
+  background:#eef5eb;border:1px solid #d4e7d6;color:#345d4a;
+  border-radius:9px;padding:11px 15px;margin:0 0 10px;
+  font-size:14px;line-height:1.45;flex:0 0 auto;
+}
+.purpose-mark{font-size:11px;letter-spacing:.7px;font-weight:800;color:#28785a;background:#d7eadc;padding:5px 7px;border-radius:5px;margin-right:8px}
+body.screen-layout .view-tabs{flex-shrink:0}
+body.screen-layout .workspace{min-height:0}
+body.screen-layout .info-column{gap:0}
+body.screen-layout .info-top h3{font-size:17px}
+body.screen-layout .action-callout{background:#eaf4e6;border-color:#cfe6cf;padding:15px 14px;gap:12px;min-height:90px}
+body.screen-layout .action-callout strong{font-size:17px;line-height:1.35}
+body.screen-layout .action-callout p{font-size:14px;line-height:1.55;margin-top:6px;color:#496656}
+body.screen-layout .event-icon{width:39px;height:39px;flex:0 0 39px;font-size:21px}
+.step-reason{padding:13px 14px;margin:2px 0 14px;background:#f8f9f5;border:1px solid #e6ecdf;border-radius:9px;font-size:13px;line-height:1.6;color:#556e60}
+body.screen-layout .stats>div{padding:12px}
+body.screen-layout .stats strong{font-size:23px}
+body.screen-layout .stats span{font-size:12px}
+body.screen-layout .stack-top{font-size:13px}
+body.screen-layout .stack-visual{margin-top:9px;max-height:85px;min-height:45px;padding:10px;gap:7px}
+body.screen-layout .stack-item{font-size:12px;padding:7px 10px}
+body.screen-layout .code-head{margin-top:14px}
+body.screen-layout .code-head>strong{font-size:13px;white-space:normal}
+body.screen-layout .code-details{display:flex;flex-direction:column;flex:1;min-height:0;padding-top:9px}
+body.screen-layout .code-details[hidden]{display:none!important}
+body.screen-layout .language-switch{margin-left:auto}
+body.screen-layout .code-toggle{
+  border:1px solid #b9d9be;background:#e5f3e6;color:#176744;border-radius:8px;
+  min-height:42px;padding:9px 14px;font-size:13px;font-weight:800;white-space:nowrap;margin-left:auto
+}
+body.screen-layout .code-toggle:hover{background:#d1ebd7}
+body.screen-layout .info-column:not(.has-code) .tiny-hint{margin-top:auto;padding-top:14px;color:#728476;font-size:12px}
+body.screen-layout .code-box{font-size:13px;line-height:1.6}
+body.screen-layout .code-box>div{line-height:1.65}
+body.screen-layout .code-actions-row{margin:7px 0 2px;gap:7px}
+body.screen-layout .code-actions-row>span{font-size:11px}
+body.screen-layout .code-action-buttons button{min-height:38px;padding:8px 11px;font-size:12px}
+body.screen-layout .language-switch button{min-height:38px;min-width:70px;font-size:13px}
+body.screen-layout .code-details .code-box{flex:1;min-height:110px;max-height:100%;overflow:auto}
+body.screen-layout .cell.is-candidate{border:3px solid #e59a27;box-shadow:0 0 0 3px #f7c56a69;z-index:7}
+body.screen-layout .legend span{font-size:12px}
+body.screen-layout .preset{font-size:12px;min-height:40px;padding:9px 12px}
+body.screen-layout .editor-label{font-size:12px}
+body.screen-layout .edit-tool{font-size:12px;min-height:40px;padding:9px 12px}
+body.screen-layout .reset-map{min-width:42px;min-height:42px}
+body.screen-layout .playbar{padding:10px 14px;gap:12px}
+body.screen-layout .playbar button{min-height:45px;font-size:13px}
+body.screen-layout .play-main{font-size:14px}
+body.screen-layout .timeline{min-width:140px;gap:12px}
+body.screen-layout .timeline span{font-size:12px}
+body.screen-layout input[type=range]{height:33px;cursor:pointer;touch-action:pan-x}
+body.screen-layout input[type=range]::-webkit-slider-thumb{min-width:22px;min-height:22px}
+.lab-settings{position:relative;margin-left:auto}
+.lab-settings>summary{
+  list-style:none;display:flex;gap:8px;align-items:center;justify-content:center;
+  min-height:45px;border:1px solid #cfe0d0;background:#fff;color:#346a55;
+  border-radius:9px;padding:10px 13px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap
+}
+.lab-settings>summary::-webkit-details-marker{display:none}
+.lab-settings[open]>summary{background:#e1f2e7}
+.lab-settings-popover{
+  position:absolute;right:0;bottom:calc(100% + 8px);z-index:20;
+  width:min(310px,calc(100vw - 32px));background:#fff;border:1px solid #cadccb;
+  border-radius:12px;padding:16px;box-shadow:0 14px 40px #173a2736;
+  display:flex;flex-direction:column;gap:9px
+}
+.lab-settings-popover label{font-size:12px;font-weight:800;color:#486b55}
+.lab-settings-popover>input{width:100%}
+.lab-settings-popover .direction-row{display:flex;flex-direction:column;align-items:stretch;gap:7px;margin:0}
+.lab-settings-popover .direction-row select{min-height:43px;padding:9px;font-size:12px;max-width:100%}
+.lab-settings-popover p{font-size:11.5px;color:#738878}
+.mobile-decision{display:none}
+body.screen-layout .playbar .buttons{flex-wrap:nowrap}
+body.screen-layout .playbar .buttons .step-btn{white-space:nowrap}
+body.screen-layout .playbar .buttons #nextBtn{background:#e9f3ea;border-color:#bad6c2;color:#175e43}
+body.screen-layout .playbar .buttons #nextBtn:hover{background:#d6ebd8}
+
+/* More accessible application/practice panels */
+body.screen-layout .section-head h2{font-size:23px;margin-bottom:7px}
+body.screen-layout .section-head p{font-size:14px;line-height:1.55}
+body.screen-layout .app-heading h3{font-size:19px}
+body.screen-layout .app-card p{font-size:14px}
+body.screen-layout .app-action,body.screen-layout .app-bottom button{font-size:14px;min-height:42px}
+body.screen-layout .exercise h3{font-size:17px}
+body.screen-layout .exercise p{font-size:13px}
+body.screen-layout .exercise button{font-size:13px;min-height:43px;padding:11px 16px}
+body.screen-layout .app-mode-switch button{min-height:43px;font-size:13px}
+body.screen-layout footer{display:none}
+
+/* Mid-size laptops: scroll only the inspector, never cut off play controls */
+@media(max-height:800px) and (min-width:1051px){
+  .journey-story,.try-card{padding:18px 22px}
+  .journey-story h1{font-size:32px;margin:9px 0}
+  .why-question{margin:12px 0 8px;padding:11px}
+  .why-question p{font-size:13px}
+  .journey-steps{margin:11px 0}
+  .journey-steps>div{padding:8px}
+  .journey-steps small{font-size:10px}
+  .learn-footer{padding:8px}
+  body.screen-layout .info-column{overflow-y:auto}
+  body.screen-layout .action-callout{padding:10px;min-height:0}
+  body.screen-layout .step-reason{padding:9px;margin-bottom:9px}
+  body.screen-layout .stack-visual{max-height:55px}
+}
+
+/* Tablet with a single primary map and a separate explanation view */
+@media(max-width:1050px){
+  body.screen-layout .workspace{grid-template-columns:minmax(0,1fr)}
+  body.screen-layout .workspace[data-active-panel="map"]>.info-column{display:none}
+  body.screen-layout .workspace[data-active-panel="explain"]>.info-column{display:flex;overflow-y:auto}
+  body.screen-layout .lab-purpose{font-size:12px;margin-bottom:8px;padding:9px 12px}
+  .journey-layout{grid-template-columns:1fr 1fr;gap:11px}
+  .journey-story,.try-card{padding:16px}
+  .journey-story h1{font-size:30px}
+  .journey-story>p,.why-question p{font-size:13px}
+  .why-question{padding:12px;margin:12px 0 9px}
+  .journey-steps{gap:5px;margin:10px 0}
+  .journey-steps>div{padding:7px}
+  .journey-steps b{font-size:11px}
+  .journey-steps small{font-size:10px}
+  .try-controls{gap:7px}
+  .arrow-pad button,.try-secondary button{min-width:43px;height:43px}
+  body.screen-layout .code-details .code-box{min-height:130px}
+}
+
+/* Phone: playable maze first, easy reading, scrolling inside a single lesson tab */
+@media(max-width:750px){
+  body.screen-layout .site-head,body.screen-layout .site-head .head-row{height:52px}
+  body.screen-layout main>.shell{height:calc(100dvh - 52px);width:calc(100% - 20px)}
+  body.screen-layout .view-tabs{min-height:49px;padding:4px;margin:7px 0 8px;gap:2px}
+  body.screen-layout .view-tab{flex:1;min-height:42px;padding:8px 3px;font-size:11.5px;white-space:nowrap}
+  body.screen-layout .journey-section{overflow-y:auto}
+  .journey-layout{display:flex;flex-direction:column;gap:12px;flex:none}
+  .journey-story{order:2}
+  .try-card{order:1}
+  .journey-story,.try-card{padding:15px;border-radius:13px}
+  .try-head{margin-bottom:11px}
+  .try-head h2{font-size:19px}
+  .mini-kicker{font-size:10px;letter-spacing:.8px}
+  .try-tag{font-size:10px;padding:7px}
+  .try-body{padding:12px;gap:7px}
+  .manual-board{gap:5px;max-width:390px}
+  .manual-cell{border-radius:7px;font-size:17px}
+  .try-message{font-size:12.5px;line-height:1.4;min-height:41px}
+  .try-controls{margin-top:12px}
+  .arrow-pad{gap:5px}
+  .arrow-pad button{width:43px;height:43px;min-width:43px}
+  .try-secondary{gap:5px}
+  .try-secondary button{height:43px;min-width:0;padding:0 8px;font-size:12px}
+  .journey-eyebrow{font-size:10px}
+  .journey-story h1{font-size:29px;margin:10px 0}
+  .journey-story>p{font-size:14px}
+  .why-question{margin:14px 0 10px;padding:13px}
+  .why-question strong{font-size:14px}
+  .why-question p{font-size:13px}
+  .journey-steps{margin:12px 0;gap:5px}
+  .journey-steps>div{padding:8px 6px}
+  .journey-steps small{font-size:10px}
+  .journey-cta{min-height:50px;font-size:14px}
+  .learn-footer{display:none}
+  body.screen-layout .lab-purpose{font-size:12px;margin:0 0 7px;padding:7px 10px;line-height:1.45}
+  body.screen-layout .mobile-view-switch button{min-height:43px;font-size:12px}
+  .mobile-decision{
+    display:block;background:#f0f6e9;border-left:3px solid #3c9b70;
+    padding:9px 10px;border-radius:5px;margin:8px 0;font-size:12px;
+    font-weight:700;color:#35604b;line-height:1.45
+  }
+  body.screen-layout .map-column{padding:10px 11px}
+  body.screen-layout .preset-bar{gap:5px;margin-bottom:5px}
+  body.screen-layout .preset{min-height:36px;padding:7px 8px;font-size:11px}
+  body.screen-layout .board-caption{margin-bottom:6px}
+  body.screen-layout .legend{padding:9px 0;gap:9px}
+  body.screen-layout .legend span{font-size:10px}
+  body.screen-layout .edit-tool{min-height:39px;padding:8px;font-size:11px}
+  body.screen-layout .info-column{padding:11px}
+  body.screen-layout .info-top h3{font-size:16px}
+  body.screen-layout .action-callout{padding:12px;min-height:0;margin:8px 0}
+  body.screen-layout .action-callout strong{font-size:16px}
+  body.screen-layout .action-callout p{font-size:13.5px}
+  .step-reason{padding:10px;margin-bottom:9px;font-size:13px}
+  body.screen-layout .stats span{font-size:11px}
+  body.screen-layout .playbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;padding:8px 10px}
+  body.screen-layout .playbar .buttons{grid-column:1/-1;display:flex;gap:6px;justify-content:space-between}
+  body.screen-layout .playbar button{min-height:43px}
+  body.screen-layout .playbar .buttons #nextBtn{flex:1}
+  body.screen-layout .playbar .buttons .step-btn{padding:9px 11px;font-size:12px}
+  body.screen-layout .play-main{font-size:12px;padding:9px 10px;min-width:97px}
+  body.screen-layout .timeline{grid-column:1;min-width:0;margin:0;align-items:center}
+  body.screen-layout .lab-settings{grid-column:2;margin:0}
+  body.screen-layout .lab-settings>summary{min-height:43px;font-size:11px;padding:9px 10px}
+  body.screen-layout .code-head>strong{font-size:12px}
+  body.screen-layout .code-toggle{min-height:40px;font-size:12px}
+  body.screen-layout .code-box{font-size:12px}
+  body.screen-layout .code-details .code-box{min-height:200px}
+  body.screen-layout .app-card p{font-size:14px}
+  body.screen-layout .exercise h3{font-size:15px}
+  body.screen-layout .exercise p{font-size:12px}
+}
+@media(max-width:380px){
+  body.screen-layout .view-tab{font-size:10.5px;padding:8px 2px}
+  .try-head h2{font-size:17px}
+  .try-tag{display:none}
+  .try-secondary button{font-size:11px;padding:0 7px}
+  .arrow-pad button{min-width:40px;width:40px;height:42px}
+  body.screen-layout .preset{padding:7px 6px;font-size:10px}
+  body.screen-layout .playbar .buttons #nextBtn{font-size:11px;padding:7px}
+  body.screen-layout .playbar .buttons .step-btn{padding:7px}
+}
+@media(prefers-reduced-motion:reduce){.journey-cta,.manual-cell{transition:none}}
+
+.try-mobile-explain{display:none}
+@media(max-width:750px){
+  .try-mobile-explain{
+    display:flex;flex-direction:column;gap:7px;line-height:1.5;
+    margin-top:12px;padding:12px;border-radius:10px;
+    background:#e9f4eb;border:1px solid #d2e5d3;
+    color:#496d53;font-size:12.5px
+  }
+  .try-mobile-explain strong{font-size:14px;color:#24654b}
+  .try-mobile-explain button{
+    width:100%;min-height:45px;padding:11px 13px;
+    border-radius:9px;background:#167b5b;color:white;border:0;
+    font-size:13px;font-weight:800;margin-top:4px
+  }
+  .try-mobile-explain button:hover{background:#125c46}
+  body.screen-layout .lab-purpose{font-size:11.5px;padding:7px 9px}
+}
+
+.preset-mobile-label{display:none}
+@media(max-width:750px){
+  body.screen-layout .preset-bar{display:flex;margin-bottom:7px}
+  body.screen-layout .preset-bar>button{display:none}
+  body.screen-layout .preset-mobile-label{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    width:100%;font-size:12px;font-weight:800;color:#53695d
+  }
+  body.screen-layout .preset-mobile-label select{
+    flex:1;max-width:230px;min-height:44px;background:white;
+    border:1px solid #c9d9ca;border-radius:9px;padding:8px 10px;
+    color:#1b5942;font-size:13px;font-weight:700;cursor:pointer
+  }
+  .arrow-pad button{min-width:44px!important;width:44px!important;height:44px!important}
+  .try-secondary button{min-height:44px!important}
+  body.screen-layout .editor-actions .edit-tool{min-height:42px;font-size:12px}
+}
+@media(max-width:380px){
+  .try-controls{justify-content:center}
+  .try-secondary{justify-content:center}
+}

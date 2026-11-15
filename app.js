@@ -1,6 +1,13 @@
 "use strict";
 
 const PRESETS = {
+  starter: [
+    "....###",
+    ".#####.",
+    "...##..",
+    "##..#..",
+    "......."
+  ],
   classic: [
     ".........",
     ".###.##..",
@@ -50,7 +57,7 @@ const $ = (id) => document.getElementById(id);
 const state = {
   grid: [], initialGrid: [], rows: 0, cols: 0,
   start: {r: 0, c: 0}, goal: {r: 6, c: 8},
-  preset: "classic", tool: "wall",
+  preset: "starter", tool: "wall",
   trace: null, stepIndex: 0, timer: null, isPlaying: false,
   challenge: null, challengeGuess: null, challengeTarget: -1,
   components: null
@@ -111,15 +118,15 @@ function createTrace() {
   let count = 0, backtracks = 0, path = [];
   const goal = gridKey(state.goal.r,state.goal.c);
   const directions = getOrder();
-  function record(type, r, c, line, title, description) {
+  function record(type, r, c, line, title, description, candidate = null) {
     steps.push({
-      type, r, c, line, title, description,
+      type, r, c, line, title, description, candidate,
       visited:visited.slice(), order:order.slice(), backtracked:backtracked.slice(),
       stack:stack.slice(), trail:trail.map((edge)=>edge.slice()), path:path.slice(),
       counter:count, backtracks
     });
   }
-  record("ready",-1,-1,0,"Bắt đầu tại S","DFS sẽ đi vào ô đầu tiên và đánh dấu đã thăm.");
+  record("ready",-1,-1,0,"Bài toán: tìm E","Bắt đầu từ S. Máy thử một lối, ghi nhớ các ô đã đến và quay lại nếu hết đường.");
   function dfs(r,c) {
     if (!isOpen(r,c)) return false;
     const key = gridKey(r,c);
@@ -127,21 +134,26 @@ function createTrace() {
     visited[key]=1; order[key]=++count;
     if (stack.length) trail.push([stack[stack.length-1],key]);
     stack.push(key);
-    record("visit",r,c,3,"Thăm ô " + coordText(r,c),
-      "Đánh dấu ô rồi đi tiếp theo hướng ưu tiên. Ô tím là lời gọi đang xét.");
+    record("visit",r,c,3,"Đến ô " + coordText(r,c),
+      "Tô tím ô vừa đi qua và đánh dấu đã thăm để không quay vòng.");
     if (key === goal) {
       path = stack.slice();
       record("found",r,c,4,"Đã tới E!","Đường xanh là đường DFS vừa tìm được.");
       return true;
     }
     for (const [dr,dc] of directions) {
-      if (dfs(r+dr,c+dc)) return true;
+      const nr = r + dr, nc = c + dc;
+      if (!isOpen(nr,nc) || visited[gridKey(nr,nc)]) continue;
+      const tenHuong = dr === 1 ? "xuống" : dr === -1 ? "lên" : dc === 1 ? "phải" : "trái";
+      record("choice",r,c,6,"Thử đi " + tenHuong,
+        "Ô " + coordText(nr,nc) + " còn trống, chưa thăm. DFS chọn ô này trước.",{r:nr,c:nc});
+      if (dfs(nr,nc)) return true;
     }
     stack.pop();
     backtracked[key]=1; backtracks++;
     const parent = stack.length ? toCoord(stack[stack.length-1]) : null;
     record("backtrack",r,c,7,"Quay lui từ " + coordText(r,c),
-      parent ? "Hết lối đi, trở lại " + coordText(parent.r,parent.c) + " để thử nhánh khác." :
+      parent ? "Không còn ô kề nào chưa thăm. Quay lại " + coordText(parent.r,parent.c) + " để thử hướng khác." :
       "Đã thử hết vùng có thể đi từ S.");
     return false;
   }
@@ -177,6 +189,7 @@ function loadPreset(name, preserveChallenge=false) {
   }
   document.querySelectorAll("[data-preset]").forEach((button)=>
     button.classList.toggle("active",button.dataset.preset===name));
+  if(document.getElementById("presetMobile")) document.getElementById("presetMobile").value=name;
   calculateTrace();
 }
 
@@ -225,6 +238,7 @@ function renderBoard(frame) {
     if(start)cell.classList.add("is-start");
     if(goal)cell.classList.add("is-goal");
     if(key===active)cell.classList.add("is-current");
+    if(frame.candidate && frame.candidate.r===r && frame.candidate.c===c)cell.classList.add("is-candidate");
     if(key===state.challengeGuess && state.challenge==="predict")cell.classList.add("is-guessed");
     cell.setAttribute("aria-label","Hàng "+r+", cột "+c+", "+(wall?"tường":"ô trống")+
       (start?", bắt đầu":"")+(goal?", đích":"")+
@@ -281,8 +295,20 @@ function renderInspector(frame) {
   $("backtrackCount").textContent=frame.backtracks;
   $("eventTitle").textContent=frame.title;
   $("eventText").textContent=frame.description;
+  const reason=document.getElementById("decisionExplanation");
+  const mobileReason=document.getElementById("mobileDecision");
+  const learnerMessage={
+    ready:"Bắt đầu ở S. Bấm Bước tiếp theo để xem máy thử lối nào.",
+    visit:"Đánh dấu ô này để không quay lại và lặp vô hạn.",
+    choice:"Ô viền vàng là lựa chọn tiếp theo. Máy chỉ đi khi ô còn trống và chưa thăm.",
+    backtrack:"Ngõ cụt! Không đi tiếp được nên DFS trở về ô trước.",
+    found:"Đã đến E. Đường màu xanh lá là kết quả.",
+    failed:"Đã thử hết những ô có thể đến từ S nhưng không tới E."
+  };
+  if(reason)reason.textContent=learnerMessage[frame.type]||frame.description;
+  if(mobileReason)mobileReason.textContent=frame.title+": "+(learnerMessage[frame.type]||frame.description);
   $("eventIcon").textContent=frame.type==="backtrack"?"↶":
-    frame.type==="found"?"✓":frame.type==="failed"?"×":"↳";
+    frame.type==="found"?"✓":frame.type==="failed"?"×":frame.type==="choice"?"→":"↳";
   const stack=$("stackVisual");stack.replaceChildren();
   if(frame.stack.length===0){const empty=document.createElement("span");empty.textContent="Chưa có ô nào";stack.appendChild(empty);}
   else frame.stack.forEach((key,i)=>{
@@ -625,16 +651,17 @@ function bindEvents(){
 document.addEventListener("DOMContentLoaded",()=>{
   bindEvents();
   window.DFSCode?.init(state);
-  loadPreset("classic");
+  loadPreset("starter");
   resetPaint();
   makeMazePreview();
   renderIslandPreview(false);
 });
 
 // Active view navigation keeps the page in one viewport.
-let activeView="lab";
+let activeView="learn";
 function showView(name,updateHash=false) {
-  const view=["lab","applications","practice","learn"].includes(name)?name:"lab";
+  const view=["lab","applications","practice","learn"].includes(name)?name:"learn";
+  if(view!=="lab" && state.isPlaying) clearTimer();
   activeView=view;
   document.querySelectorAll("[data-view-panel]").forEach(panel=>{
     panel.hidden=panel.dataset.viewPanel!==view;
@@ -656,17 +683,6 @@ function setMobilePanel(which){
   const value=which==="explain"?"explain":"map";
   const workspace=document.querySelector(".workspace");
   if(workspace)workspace.dataset.activePanel=value;
-  document.querySelectorAll("[data-app-card]").forEach(button=>
-    button.addEventListener("click",()=>{
-      const target=Number(button.dataset.appCard);
-      document.querySelectorAll(".app-card").forEach((card,index)=>
-        card.classList.toggle("active",index===target));
-      document.querySelectorAll("[data-app-card]").forEach(tab=>{
-        const on=Number(tab.dataset.appCard)===target;
-        tab.classList.toggle("active",on);
-        tab.setAttribute("aria-pressed",String(on));
-      });
-    }));
   document.querySelectorAll("[data-mobile-panel]").forEach(button=>{
     const on=button.dataset.mobilePanel===value;
     button.classList.toggle("active",on);
@@ -694,12 +710,23 @@ function fitBoardToHeight(){
 }
 document.addEventListener("DOMContentLoaded",()=>{
   document.body.classList.add("screen-layout");
-  const initial=decodeURIComponent(location.hash.replace("#",""));
+  const initial=decodeURIComponent(location.hash.replace("#","")) || "learn";
   document.querySelectorAll("[data-view]").forEach(button=>
     button.addEventListener("click",()=>showView(button.dataset.view,true)));
   document.querySelectorAll("[data-open-view]").forEach(anchor=>
     anchor.addEventListener("click",event=>{
       event.preventDefault();showView(anchor.dataset.openView,true);
+    }));
+  document.querySelectorAll("[data-app-card]").forEach(button=>
+    button.addEventListener("click",()=>{
+      const target=Number(button.dataset.appCard);
+      document.querySelectorAll(".app-card").forEach((card,index)=>
+        card.classList.toggle("active",index===target));
+      document.querySelectorAll("[data-app-card]").forEach(tab=>{
+        const on=Number(tab.dataset.appCard)===target;
+        tab.classList.toggle("active",on);
+        tab.setAttribute("aria-pressed",String(on));
+      });
     }));
   document.querySelectorAll("[data-mobile-panel]").forEach(button=>
     button.addEventListener("click",()=>setMobilePanel(button.dataset.mobilePanel)));

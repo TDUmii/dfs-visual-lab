@@ -39,7 +39,7 @@
       ];
       if (!full) return core;
       return [
-        add("# 0 = o trong, # = tuong"),
+        add("# Dau . la o trong, dau # la tuong"),
         add("banDo = ["),
         ...gridRows.map((row) => add("    " + JSON.stringify(row) + ",")),
         add("]"),
@@ -150,7 +150,7 @@
     if (!frame) return;
     refreshSnippet();
     const type = frame.type;
-    const kind = type === "visit" ? "visit" : type === "found" ? "found" :
+    const kind = type === "visit" ? "visit" : type === "choice" ? "explore" : type === "found" ? "found" :
       type === "backtrack" || type === "failed" ? "backtrack" : "";
     let active = null;
     document.querySelectorAll("#pseudoCode [data-phase]").forEach((line) => {

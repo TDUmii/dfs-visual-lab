@@ -1,49 +1,36 @@
 # DFS Lab
 
-Website học DFS trên ma trận 2 chiều, ưu tiên hình ảnh và thao tác trực tiếp.
+Website tiếng Việt học DFS trên ma trận 2 chiều, bắt đầu từ lý do cần thuật toán thay vì trình bày mã giả ngay.
 
-Trang công khai: https://dfs-visual-lab.vercel.app/
+Website: https://dfs-visual-lab.vercel.app/
 
-## Có gì trên web
+## Cách học
 
-- Mô phỏng DFS trên lưới, có đường đang đi, ô đã thăm, ô quay lui.
-- Từng bước, chạy và tạm dừng, tua lại, chỉnh tốc độ và thứ tự hướng.
-- Tự xây bản đồ, đổi điểm S và E, thử mê cung hoặc bản đồ ngẫu nhiên.
-- Ứng dụng trực quan: tìm lối ra, loang màu, đếm số đảo.
-- 3 bài tập: đoán ô tiếp theo, chặn đường, đếm vùng.
-- Mã giả và giải thích ngắn, đúng cơ chế đánh dấu và quay lui.
-- Dùng được trên máy tính và điện thoại, không cần đăng nhập.
+1. Bắt đầu: tự đi trong mê cung nhỏ. Khi gặp ngõ cụt, quay lại và ghi nhớ ô đã thăm.
+2. Xem DFS: máy thử từng hướng, giải thích vì sao chọn ô kế tiếp, đánh dấu và quay lui.
+3. Ứng dụng: thoát mê cung, loang màu, đếm vùng liên thông.
+4. Bài tập: dự đoán bước, chặn đường và đếm vùng.
 
-## Chạy trên máy
+## Tính năng
 
-Mở index.html hoặc chạy:
+- Mê cung tương tác qua chạm ô, phím mũi tên và nút điều hướng.
+- Mô phỏng các lựa chọn DFS (viền vàng), ô đã thăm và lần quay lui.
+- Thay bản đồ, đặt điểm S/E, tua bước, dừng/chạy, điều chỉnh tốc độ và thứ tự hướng.
+- Code Python / C++ nằm trong phần mở rộng, xem chương trình đầy đủ và sao chép.
+- Desktop hiển thị bản đồ và lý do cạnh nhau; mobile có nút chuyển, bảng điều khiển cố định.
+- Tối ưu font, kích thước chạm và tránh tràn ngang.
 
-    python -m http.server 8080
+## Chạy
 
-Sau đó truy cập http://localhost:8080.
+Mở index.html hoặc chạy `python -m http.server 8080`.
 
-Kiểm thử thuật toán:
+Kiểm tra thuật toán: `node test.cjs`.
 
-    node test.cjs
+Kiểm tra mã Python / C++ xuất ra (cần cài Python và g++): `node test-v5.cjs`.
 
-## Tài liệu tham khảo
+## Tham khảo
 
-- VisuAlgo, Graph Traversal: https://visualgo.net/en/dfsbfs
-- EntCS, Graph traversal visualiser: https://entcs.org/tools/graph-traversal-visualizer
+- VisuAlgo: https://visualgo.net/en/dfsbfs
+- CMU Search in Graphs: https://www.cs.cmu.edu/~15122/handouts/lectures/24-dfs.pdf
 
-Mọi hình minh họa và mã nguồn trang web được triển khai riêng cho DFS Lab.
-## Giao diện vừa màn hình
-
-- Chuyển giữa Mô phỏng, Ứng dụng, Bài tập và Giải thích bằng tab, không phải cuộn cả trang.
-- Ma trận tự thu nhỏ theo kích thước và chiều cao màn hình.
-- Trên điện thoại có nút Bản đồ / DFS giải thích; nút chạy luôn ở cuối khung.
-- Các ứng dụng có nút chọn từng ví dụ, không cần vuốt tìm.
-- Ở màn hình quá thấp, nội dung cuộn bên trong khu vực tương ứng để vẫn nhìn thấy thanh điều khiển.
-
-## Mã DFS Python / C++
-
-- Bấm Python hoặc C++ để đổi mã minh họa ngay trong mô phỏng.
-- Dòng mã đang chạy sáng lên theo sự kiện thăm ô, gặp đích và quay lui.
-- Nút Toàn bộ hiện chương trình chạy được với bản đồ, vị trí S/E và thứ tự 4 hướng đang chọn.
-- Nút Sao chép lấy phiên bản đầy đủ để chạy trong Python hoặc trình biên dịch C++.
-- Trên màn hình nhỏ, code tự xuống dòng và cuộn riêng trong panel.
+Mã và mô phỏng được tạo cho DFS Lab, không nhúng lại nội dung từ các trang tham khảo.
