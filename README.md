@@ -41,3 +41,9 @@ Kiểm thử giao diện sử dụng Chrome headless trên Windows, không chi�
 
 - VisuAlgo: https://visualgo.net/en/dfsbfs
 - CMU Search in Graphs: https://www.cs.cmu.edu/~15122/handouts/lectures/24-dfs.pdf
+
+## Bản C++ cho học sinh mới học
+
+- Không dùng vector, pair, auto hay cú pháp STL. Sử dụng char banDo[][], bool daTham[][] và 2 mảng hướng.
+- Bộ kiểm thử biên dịch bản C++ bằng chuẩn C++98.
+- Xem [Lời giảng chi tiết cho giáo viên](GIAO_AN_DFS_CPP_CO_BAN.md) để dạy lần lượt từng đoạn code, giải thích đệ quy và quay lui.

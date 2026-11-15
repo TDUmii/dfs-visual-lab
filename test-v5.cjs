@@ -19,8 +19,10 @@ for(const testcase of cases){
   let output;
   if(lang==="python")output=execFileSync("python",[filename],{encoding:"utf8",timeout:15000});
   else{
+   assert(!/\b(?:vector|auto|pair)\b/.test(contents),"C++ beginner code must not use STL or auto");
+   assert(contents.includes("char banDo[") && contents.includes("bool daTham[") && contents.includes("huongHang[4]"),"Use C-style arrays");
    const binary=path.join(dest,testcase.name+".exe");
-   execFileSync("g++",["-std=c++17","-O2","-o",binary,filename],{encoding:"utf8",timeout:35000});
+   execFileSync("g++",["-std=c++98","-Wall","-Wextra","-pedantic-errors","-O2","-o",binary,filename],{encoding:"utf8",timeout:35000});
    output=execFileSync(binary,[],{encoding:"utf8",timeout:15000});
   }
   assert(output.includes(testcase.result),lang+" "+testcase.name+" got "+output);

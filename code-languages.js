@@ -66,8 +66,12 @@
       add("    daTham[hang][cot] = true;", "visit"),
       add("    if (hang == dichHang && cot == dichCot)", "found"),
       add("        return true;", "found"),
-      add("    for (auto [dh, dc] : huong) {", "explore"),
-      add("        if (dfs(hang + dh, cot + dc)) return true;", "explore"),
+      add("    for (int i = 0; i < 4; i++) {", "explore"),
+      add("        int hangMoi = hang + huongHang[i];", "explore"),
+      add("        int cotMoi = cot + huongCot[i];", "explore"),
+      add("        if (dfs(hangMoi, cotMoi)) {", "explore"),
+      add("            return true;", "explore"),
+      add("        }"),
       add("    }"),
       add("    return false;", "backtrack"),
       add("}")
@@ -75,24 +79,27 @@
     if (!full) return core;
     return [
       add("#include <iostream>"),
-      add("#include <vector>"),
-      add("#include <string>"),
-      add("#include <utility>"),
       add("using namespace std;"),
       add(""),
-      add("vector<string> banDo = {"),
+      add("const int soHang = " + gridRows.length + ";"),
+      add("const int soCot = " + gridRows[0].length + ";"),
+      add("char banDo[soHang][soCot + 1] = {"),
       ...gridRows.map((row) => add("    " + JSON.stringify(row) + ",")),
       add("};"),
-      add("int soHang = (int)banDo.size();"),
-      add("int soCot = (int)banDo[0].size();"),
-      add("vector<vector<bool>> daTham(soHang, vector<bool>(soCot, false));"),
-      add("vector<pair<int, int>> huong = { " + order.map(([dr, dc]) => "{" + dr + ", " + dc + "}").join(", ") + " };"),
-      add("int dichHang = " + goal.r + ", dichCot = " + goal.c + ";"),
+      add("bool daTham[soHang][soCot] = {false};"),
+      add("int huongHang[4] = {" + order.map(([dr]) => dr).join(", ") + "};"),
+      add("int huongCot[4] = {" + order.map(([, dc]) => dc).join(", ") + "};"),
+      add("int dichHang = " + goal.r + ";"),
+      add("int dichCot = " + goal.c + ";"),
       add(""),
       ...core,
       add(""),
       add("int main() {"),
-      add("    cout << (dfs(" + start.r + ", " + start.c + ") ? \"Tim thay duong di\" : \"Khong co duong di\") << '\\n';"),
+      add("    if (dfs(" + start.r + ", " + start.c + ")) {"),
+      add('        cout << "Tim thay duong di" << endl;'),
+      add("    } else {"),
+      add('        cout << "Khong co duong di" << endl;'),
+      add("    }"),
       add("    return 0;"),
       add("}")
     ];
@@ -126,9 +133,9 @@
       focus: 6
     },
     {
-      title: "5. Thử ô kề và tiếp tục đi sâu",
-      why: "Từ ô hiện tại, thử từng hướng đã chọn. Gọi lại dfs với tọa độ ô kề, nên máy sẽ đi sâu hết một nhánh trước khi đổi nhánh.",
-      example: "Đang ở (1, 2), đi xuống sẽ gọi dfs(2, 2).",
+      title: "5. Tính tọa độ ô kề và gọi lại DFS",
+      why: "Hai mảng hướng cho biết hàng và cột cần thay đổi. Từ ô hiện tại, tính tọa độ mới rồi gọi lại dfs. Vì gọi lại chính hàm đó, máy sẽ đi sâu hết một nhánh trước khi thử nhánh khác.",
+      example: "Ở (1, 2), hướng xuống (+1, 0) tạo dfs(2, 2).",
       focus: 9
     },
     {
@@ -151,12 +158,22 @@
     if (index >= 1 && index <= 4) return 2;
     if (index === 5) return 3;
     if (index >= 6 && index <= 7) return 4;
-    if (index >= 8 && index <= 10) return 5;
-    return 6;
+    if (lang === "cpp") return index >= 8 && index <= 14 ? 5 : 6;
+    return index >= 8 && index <= 10 ? 5 : 6;
   }
 
   function explainLine(source, index, lang) {
     const isPython = lang === "python";
+    if (!isPython && index >= 8) {
+      if (index === 8) return "Vòng for chạy i từ 0 đến 3 để thử đúng bốn hướng.";
+      if (index === 9) return "Lấy độ thay đổi hàng trong huongHang[i] và tính hàng mới.";
+      if (index === 10) return "Lấy độ thay đổi cột trong huongCot[i] và tính cột mới.";
+      if (index === 11) return "Gọi lại hàm dfs với ô kề bên, đây là bước đệ quy.";
+      if (index === 12) return "Nếu nhánh vừa đi tìm thấy E, trả về true ngay.";
+      if (index === 13 || index === 14) return "Dấu ngoặc đóng khối if hoặc vòng for.";
+      if (index === 15) return "Hết cả bốn hướng mà chưa tìm thấy E: trả false và quay lại ô trước.";
+      return "Dấu ngoặc đóng hàm dfs.";
+    }
     if (index === 0) return "Định nghĩa hàm nhận vị trí hiện tại: hàng và cột. Mỗi lần đi sang ô khác, hàm sẽ được gọi lại.";
     if (index === 1) return "Kiểm tra hàng hoặc cột có nằm ngoài ma trận không. Chỉ số hợp lệ bắt đầu từ 0.";
     if (index === 2) return "Nếu vượt biên thì dừng nhánh này. Không được đọc ô ngoài mảng.";
@@ -187,9 +204,9 @@
   function currentIndex(frame) {
     if (!frame) return 0;
     if (frame.type === "visit") return 5;
-    if (frame.type === "choice") return 9;
+    if (frame.type === "choice") return language === "cpp" ? 11 : 9;
     if (frame.type === "found") return 6;
-    if (frame.type === "backtrack" || frame.type === "failed") return 11;
+    if (frame.type === "backtrack" || frame.type === "failed") return language === "cpp" ? 15 : 11;
     return 0;
   }
 
@@ -218,7 +235,7 @@
       $("codeNextStage").innerHTML = buildStage === STAGES.length ?
         'Chạy thử trên mê cung <svg class="ui-icon"><use href="#ic-arrow"></use></svg>' :
         'Thêm phần tiếp <svg class="ui-icon"><use href="#ic-arrow"></use></svg>';
-      $("codeWorkbenchLabel").textContent = "Các dòng đã xây";
+      $("codeWorkbenchLabel").textContent = language === "cpp" ? "C++ cơ bản: dùng mảng, không vector" : "Các dòng đã xây";
       $("codeLineNote").textContent = buildStage < 6 ? "Đang xây hàm từng phần. Chưa phải chương trình hoàn chỉnh. Bấm từng dòng để hiểu lý do cần dòng đó." : "Đã có đủ các phần của hàm DFS. Bấm dòng bất kỳ để xem giải thích.";
     } else {
       const frame = lastFrame;
@@ -230,7 +247,7 @@
       $("codePrevStage").disabled = !labState || labState.stepIndex === 0;
       $("codeNextStage").disabled = !labState || labState.stepIndex >= (labState.trace?.steps.length || 1) - 1;
       $("codeNextStage").innerHTML = 'Bước DFS kế <svg class="ui-icon"><use href="#ic-arrow"></use></svg>';
-      $("codeWorkbenchLabel").textContent = "Dòng sáng đang thực hiện";
+      $("codeWorkbenchLabel").textContent = language === "cpp" ? "C++ mảng 2 chiều: dòng sáng đang thực hiện" : "Dòng sáng đang thực hiện";
       $("codeLineNote").textContent = explainLine("", currentIndex(frame), language);
     }
     $("codeFileLabel").textContent = language === "python" ? "dfs.py" : "dfs.cpp";
