@@ -10,6 +10,17 @@ const PRESETS = {
     "...#.##..",
     "........."
   ],
+  deadend: [
+    ".........",
+    ".#######.",
+    ".#.......",
+    ".#.#####.",
+    "...#.....",
+    "##.#.###.",
+    "...#...#.",
+    ".#####.#.",
+    "........."
+  ],
   maze: [
     ".........",
     ".#######.",
@@ -30,619 +41,589 @@ const PRESETS = {
     "##.######",
     "##...##.."
   ],
-  blank: Array.from({ length: 7 }, () => "........."),
-  block: [
-    ".........",
-    ".#######.",
-    ".#.....#.",
-    ".#.###.#.",
-    ".#...#.#.",
-    ".###.#.#.",
-    "........."
-  ]
+  blank: Array.from({ length: 7 }, () => ".........")
 };
 
-const DIRS = {
-  up: [-1, 0],
-  down: [1, 0],
-  left: [0, -1],
-  right: [0, 1]
-};
-
-const ANSWERS = [1, 0, 2];
-const EXPLANATIONS = [
-  "DFS quay lui về lời gọi trước để tiếp tục thử các hướng chưa đi.",
-  "Nếu không đánh dấu đã thăm, DFS có thể chạy qua lại giữa hai ô mãi mãi.",
-  "Có tối đa n × m ô, mỗi ô được thăm một lần; xét tối đa 4 ô kề."
-];
-
+const DIRS = { up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] };
 const $ = (id) => document.getElementById(id);
+
 const state = {
-  grid: [],
-  initialGrid: [],
-  rows: 0,
-  cols: 0,
-  start: { r: 0, c: 0 },
-  goal: { r: 6, c: 8 },
-  preset: "classic",
-  tool: "wall",
-  trace: null,
-  stepIndex: 0,
-  timer: null,
-  isPlaying: false,
-  challenge: null,
-  components: null,
-  quizAnswers: [null, null, null]
+  grid: [], initialGrid: [], rows: 0, cols: 0,
+  start: {r: 0, c: 0}, goal: {r: 6, c: 8},
+  preset: "classic", tool: "wall",
+  trace: null, stepIndex: 0, timer: null, isPlaying: false,
+  challenge: null, challengeGuess: null, challengeTarget: -1,
+  components: null
 };
 
-function coordinate(r, c) {
-  return "(" + r + ", " + c + ")";
-}
-
-function inside(r, c) {
-  return r >= 0 && r < state.rows && c >= 0 && c < state.cols;
-}
-
-function isOpen(r, c) {
-  return inside(r, c) && state.grid[r][c] === ".";
-}
-
-function indexOfCell(r, c) {
-  return r * state.cols + c;
-}
-
-function keyToCoordinate(key) {
-  return { r: Math.floor(key / state.cols), c: key % state.cols };
-}
-
-function parseMap(map) {
-  return map.map((line) => line.split(""));
-}
-
-function randomMap() {
-  const rows = 7, cols = 9;
-  return Array.from({ length: rows }, (_, r) =>
-    Array.from({ length: cols }, (_, c) => {
-      if ((r === 0 && c === 0) || (r === rows - 1 && c === cols - 1)) return ".";
-      return Math.random() < 0.29 ? "#" : ".";
-    })
-  );
-}
-
-function loadPreset(name, preserveChallenge = false) {
-  stopPlayback();
-  const data = name === "random" ? randomMap() : parseMap(PRESETS[name] || PRESETS.classic);
-  state.preset = name;
-  state.grid = data;
-  state.initialGrid = data.map((row) => row.slice());
-  state.rows = data.length;
-  state.cols = data[0].length;
-  state.start = { r: 0, c: 0 };
-  state.goal = { r: state.rows - 1, c: state.cols - 1 };
-  state.grid[0][0] = ".";
-  state.grid[state.goal.r][state.goal.c] = ".";
-  state.initialGrid[0][0] = ".";
-  state.initialGrid[state.goal.r][state.goal.c] = ".";
-  state.components = null;
-  if (!preserveChallenge) {
-    state.challenge = null;
-    $("challengeWorkspace").hidden = true;
-  }
-  $("presetSelect").value = ["classic", "maze", "islands", "blank", "random"].includes(name) ? name : "classic";
-  calculateTrace();
-}
-
+function parseMap(lines) { return lines.map((line) => line.split("")); }
+function inside(r, c) { return r >= 0 && r < state.rows && c >= 0 && c < state.cols; }
+function isOpen(r, c) { return inside(r,c) && state.grid[r][c] === "."; }
+function gridKey(r, c) { return r * state.cols + c; }
+function toCoord(key) { return {r: Math.floor(key / state.cols), c: key % state.cols}; }
+function coordText(r,c) { return "(" + r + ", " + c + ")"; }
 function getOrder() {
-  return $("directionSelect").value.split(",").map((name) => DIRS[name]).filter(Boolean);
+  const select = $("directionSelect");
+  const raw = select ? select.value : "down,right,up,left";
+  return raw.split(",").map((direction) => DIRS[direction]).filter(Boolean);
+}
+function randomMap() {
+  return Array.from({length:7}, (_, r) =>
+    Array.from({length:9}, (_,c) =>
+      (r === 0 && c === 0) || (r === 6 && c === 8) || Math.random() > .28 ? "." : "#"));
 }
 
 function shortestPath() {
-  const queue = [indexOfCell(state.start.r, state.start.c)];
-  const parent = new Int32Array(state.rows * state.cols).fill(-1);
-  const seen = new Uint8Array(state.rows * state.cols);
-  seen[queue[0]] = 1;
+  const first = gridKey(state.start.r, state.start.c);
+  const target = gridKey(state.goal.r, state.goal.c);
+  const seen = new Uint8Array(state.rows*state.cols);
+  const parent = new Int32Array(state.rows*state.cols).fill(-1);
+  const queue = [first];
   let head = 0;
-  const target = indexOfCell(state.goal.r, state.goal.c);
+  seen[first] = 1;
   while (head < queue.length) {
     const key = queue[head++];
     if (key === target) {
-      const route = [];
-      let at = key;
-      while (at !== -1) {
-        route.push(at);
-        at = parent[at];
-      }
-      return route.reverse();
+      const path = [];
+      for (let at=key;at!==-1;at=parent[at]) path.push(at);
+      return path.reverse();
     }
-    const { r, c } = keyToCoordinate(key);
-    for (const [dr, dc] of Object.values(DIRS)) {
-      const nr = r + dr, nc = c + dc;
-      if (!isOpen(nr, nc)) continue;
-      const nk = indexOfCell(nr, nc);
-      if (seen[nk]) continue;
-      seen[nk] = 1;
-      parent[nk] = key;
-      queue.push(nk);
+    const {r,c} = toCoord(key);
+    for (const [dr,dc] of Object.values(DIRS)) {
+      const nr = r+dr, nc = c+dc;
+      if (!isOpen(nr,nc)) continue;
+      const next = gridKey(nr,nc);
+      if (seen[next]) continue;
+      seen[next] = 1; parent[next] = key; queue.push(next);
     }
   }
   return [];
 }
 
 function createTrace() {
-  const visited = new Uint8Array(state.rows * state.cols);
-  const order = new Uint16Array(state.rows * state.cols);
+  const size = state.rows*state.cols;
+  const visited = new Uint8Array(size);
+  const order = new Uint16Array(size);
+  const backtracked = new Uint8Array(size);
+  const trail = [];
   const stack = [];
   const steps = [];
-  let counter = 0, backtracks = 0, route = [];
-  const end = indexOfCell(state.goal.r, state.goal.c);
+  let count = 0, backtracks = 0, path = [];
+  const goal = gridKey(state.goal.r,state.goal.c);
   const directions = getOrder();
-
-  function emit(type, r, c, line, title, description) {
+  function record(type, r, c, line, title, description) {
     steps.push({
       type, r, c, line, title, description,
-      visited: visited.slice(), order: order.slice(),
-      stack: stack.slice(), counter, backtracks,
-      path: route.slice()
+      visited:visited.slice(), order:order.slice(), backtracked:backtracked.slice(),
+      stack:stack.slice(), trail:trail.map((edge)=>edge.slice()), path:path.slice(),
+      counter:count, backtracks
     });
   }
-
-  emit("ready", -1, -1, 0, "Sẵn sàng khám phá",
-    "DFS bắt đầu tại S. Mỗi ô được thăm đúng một lần và được đánh dấu trong ma trận.");
-
-  function dfs(r, c) {
-    if (!isOpen(r, c)) return false;
-    const key = indexOfCell(r, c);
+  record("ready",-1,-1,0,"Bắt đầu tại S","DFS sẽ đi vào ô đầu tiên và đánh dấu đã thăm.");
+  function dfs(r,c) {
+    if (!isOpen(r,c)) return false;
+    const key = gridKey(r,c);
     if (visited[key]) return false;
-
-    visited[key] = 1;
-    order[key] = ++counter;
+    visited[key]=1; order[key]=++count;
+    if (stack.length) trail.push([stack[stack.length-1],key]);
     stack.push(key);
-    emit("visit", r, c, 3, "Đang đi vào ô " + coordinate(r, c),
-      "Đánh dấu đã thăm, đẩy ô vào ngăn xếp và thử lần lượt các hướng ưu tiên.");
-
-    if (key === end) {
-      route = stack.slice();
-      emit("found", r, c, 5, "Đã tìm thấy đích!",
-        "DFS tới E. Các ô xanh lá tạo thành đường đi tìm được từ S tới E.");
+    record("visit",r,c,3,"Thăm ô " + coordText(r,c),
+      "Đánh dấu ô rồi đi tiếp theo hướng ưu tiên. Ô tím là lời gọi đang xét.");
+    if (key === goal) {
+      path = stack.slice();
+      record("found",r,c,4,"Đã tới E!","Đường xanh là đường DFS vừa tìm được.");
       return true;
     }
-
-    for (const [dr, dc] of directions) {
-      const nr = r + dr, nc = c + dc;
-      if (dfs(nr, nc)) return true;
+    for (const [dr,dc] of directions) {
+      if (dfs(r+dr,c+dc)) return true;
     }
-
     stack.pop();
-    backtracks++;
-    emit("backtrack", r, c, 9, "Quay lui từ ô " + coordinate(r, c),
-      "Không còn ô kề nào chưa thăm và hợp lệ. Hàm hiện tại kết thúc, quay về lời gọi trước.");
+    backtracked[key]=1; backtracks++;
+    const parent = stack.length ? toCoord(stack[stack.length-1]) : null;
+    record("backtrack",r,c,7,"Quay lui từ " + coordText(r,c),
+      parent ? "Hết lối đi, trở lại " + coordText(parent.r,parent.c) + " để thử nhánh khác." :
+      "Đã thử hết vùng có thể đi từ S.");
     return false;
   }
-
-  const found = dfs(state.start.r, state.start.c);
-  if (!found) {
-    emit("failed", -1, -1, 0, "Không có đường tới đích",
-      "DFS đã khám phá toàn bộ vùng có thể đi từ S nhưng không thể tới E.");
-  }
-
-  return { steps, found, route, shortest: shortestPath(), visitedCount: counter, backtracks };
+  const found = dfs(state.start.r,state.start.c);
+  if (!found) record("failed",-1,-1,0,"Không có đường tới E",
+    "DFS đã thăm mọi ô đi được từ S, nhưng không tới được E.");
+  return {steps,found,route:path,shortest:shortestPath(),visitedCount:count,backtracks};
 }
 
+function clearTimer() {
+  if (state.timer!==null) clearInterval(state.timer);
+  state.timer=null;state.isPlaying=false;
+}
 function calculateTrace() {
-  stopPlayback();
-  state.stepIndex = 0;
-  state.trace = createTrace();
-  $("stepSlider").max = state.trace.steps.length - 1;
-  $("gridSize").textContent = state.rows + " × " + state.cols;
+  clearTimer();
+  state.stepIndex=0;
+  state.trace=createTrace();
+  const slider=$("stepSlider");
+  if(slider){slider.max=state.trace.steps.length-1;slider.value=0;}
   render();
 }
-
-function renderBoard(frame) {
-  const board = $("board");
-  const axisTop = $("columnAxis");
-  const axisLeft = $("rowAxis");
-  board.style.setProperty("--cols", state.cols);
-  axisTop.style.setProperty("--cols", state.cols);
-  axisLeft.style.setProperty("--rows", state.rows);
-  axisTop.replaceChildren();
-  axisLeft.replaceChildren();
-  for (let c = 0; c < state.cols; c++) {
-    const el = document.createElement("span");
-    el.textContent = c;
-    axisTop.appendChild(el);
+function loadPreset(name, preserveChallenge=false) {
+  clearTimer();
+  const grid=name==="random"?randomMap():parseMap(PRESETS[name]||PRESETS.classic);
+  state.preset=name;state.grid=grid;state.rows=grid.length;state.cols=grid[0].length;
+  state.start={r:0,c:0};state.goal={r:state.rows-1,c:state.cols-1};
+  state.grid[0][0]=".";state.grid[state.goal.r][state.goal.c]=".";
+  state.initialGrid=state.grid.map((row)=>row.slice());
+  state.components=null;
+  if(!preserveChallenge) {
+    state.challenge=null;state.challengeGuess=null;state.challengeTarget=-1;
+    $("challengePanel").hidden=true;
   }
-  for (let r = 0; r < state.rows; r++) {
-    const el = document.createElement("span");
-    el.textContent = r;
-    axisLeft.appendChild(el);
-  }
-  const path = new Set(frame.path);
-  const currentKey = inside(frame.r, frame.c) ? indexOfCell(frame.r, frame.c) : -1;
-  const fragment = document.createDocumentFragment();
-  for (let r = 0; r < state.rows; r++) {
-    for (let c = 0; c < state.cols; c++) {
-      const key = indexOfCell(r, c);
-      const wall = state.grid[r][c] === "#";
-      const start = r === state.start.r && c === state.start.c;
-      const goal = r === state.goal.r && c === state.goal.c;
-      const cell = document.createElement("button");
-      cell.type = "button";
-      cell.className = "cell";
-      cell.dataset.r = r;
-      cell.dataset.c = c;
-      cell.setAttribute("role", "gridcell");
-      if (wall) cell.classList.add("is-wall");
-      if (frame.visited[key]) cell.classList.add("is-visited");
-      if (path.has(key)) cell.classList.add("is-path");
-      if (state.components !== null && !wall && !frame.visited[key]) {
-        const component = state.components[key];
-        if (component >= 0) cell.classList.add("is-component-" + component % 5);
-      }
-      if (start) cell.classList.add("is-start");
-      if (goal) cell.classList.add("is-goal");
-      if (currentKey === key) cell.classList.add("is-current");
-      const label = wall ? "tường" : "ô trống";
-      cell.setAttribute("aria-label", "Hàng " + r + ", cột " + c + ", " + label +
-        (start ? ", điểm bắt đầu" : "") + (goal ? ", đích" : "") +
-        (frame.visited[key] ? ", lượt thăm " + frame.order[key] : ""));
-      cell.title = coordinate(r, c) + " — " + (start ? "Bắt đầu" : goal ? "Đích" : wall ? "Tường" : "Ô trống");
-      if (start || goal) {
-        const marker = document.createElement("span");
-        marker.className = "cell-badge";
-        marker.textContent = start ? "S" : "E";
-        cell.appendChild(marker);
-      } else if (frame.visited[key]) {
-        const orderSpan = document.createElement("span");
-        orderSpan.className = "visit-order";
-        orderSpan.textContent = frame.order[key];
-        cell.appendChild(orderSpan);
-      }
-      fragment.appendChild(cell);
-    }
-  }
-  board.replaceChildren(fragment);
-}
-
-function renderStatus(frame) {
-  const finalStep = state.stepIndex === state.trace.steps.length - 1;
-  const status = $("runStatus");
-  status.className = "status-pill";
-  if (state.isPlaying) {
-    status.classList.add("running");
-    status.innerHTML = '<span class="status-dot"></span> Đang chạy';
-  } else if (finalStep && state.trace.found) {
-    status.classList.add("success");
-    status.innerHTML = '<span class="status-dot"></span> Tìm thấy đích';
-  } else if (finalStep) {
-    status.classList.add("fail");
-    status.innerHTML = '<span class="status-dot"></span> Hết đường đi';
-  } else if (state.stepIndex > 0) {
-    status.classList.add("running");
-    status.innerHTML = '<span class="status-dot"></span> Đang khám phá';
-  } else {
-    status.innerHTML = '<span class="status-dot"></span> Sẵn sàng';
-  }
-  $("playText").textContent = state.isPlaying ? "Tạm dừng" : finalStep ? "Chạy lại" : state.stepIndex > 0 ? "Tiếp tục" : "Chạy DFS";
-  $("playIcon").textContent = state.isPlaying ? "❚❚" : "▶";
-  $("prevBtn").disabled = state.stepIndex <= 0;
-  $("nextBtn").disabled = finalStep;
-}
-
-function renderInspector(frame) {
-  $("explanationTitle").textContent = frame.title;
-  $("explanationText").textContent = frame.description;
-  $("explanationIcon").textContent = frame.type === "found" ? "✓" :
-    frame.type === "backtrack" ? "↶" : frame.type === "visit" ? "↳" :
-    frame.type === "failed" ? "×" : "◎";
-  $("visitedCount").textContent = frame.counter;
-  $("depthCount").textContent = frame.stack.length;
-  $("backtrackCount").textContent = frame.backtracks;
-  $("stackDepthLabel").textContent = frame.stack.length + " hàm";
-  const stackBox = $("stackVisual");
-  stackBox.replaceChildren();
-  if (frame.stack.length === 0) {
-    const empty = document.createElement("span");
-    empty.className = "empty-copy";
-    empty.textContent = "Ngăn xếp trống";
-    stackBox.appendChild(empty);
-  } else {
-    frame.stack.forEach((key, i) => {
-      if (i !== 0) {
-        const arrow = document.createElement("span");
-        arrow.className = "stack-arrow";
-        arrow.textContent = "→";
-        stackBox.appendChild(arrow);
-      }
-      const coord = keyToCoordinate(key);
-      const chip = document.createElement("span");
-      chip.className = "stack-frame" + (i === frame.stack.length - 1 ? " latest" : "");
-      chip.textContent = "dfs" + coordinate(coord.r, coord.c);
-      stackBox.appendChild(chip);
-    });
-    stackBox.scrollTop = stackBox.scrollHeight;
-  }
-  document.querySelectorAll("#pseudoCode [data-line]").forEach((line) => {
-    line.classList.toggle("active-line", Number(line.dataset.line) === frame.line);
-  });
-  const box = $("resultBox");
-  const finished = state.stepIndex === state.trace.steps.length - 1;
-  box.hidden = !finished;
-  if (finished) {
-    if (state.trace.found) {
-      box.className = "result-box";
-      const dfsDistance = state.trace.route.length - 1;
-      const bfsDistance = state.trace.shortest.length - 1;
-      box.innerHTML = "<strong>✓ Đã tìm được đường đi</strong>DFS: " +
-        dfsDistance + " bước đi · " + frame.counter + " ô đã thăm. " +
-        "BFS ngắn nhất: " + bfsDistance + " bước đi." +
-        (dfsDistance > bfsDistance ? "<br>DFS tìm được đường dài hơn đường ngắn nhất — hoàn toàn bình thường." : "");
-    } else {
-      box.className = "result-box no-path";
-      box.innerHTML = "<strong>✕ Không thể tới đích</strong>DFS đã thăm " + frame.counter +
-        " ô nhưng E không nằm trong vùng liên thông với S.";
-    }
-  }
-}
-
-function render() {
-  if (!state.trace) return;
-  const frame = state.trace.steps[state.stepIndex];
-  renderBoard(frame);
-  renderStatus(frame);
-  renderInspector(frame);
-  $("stepLabel").textContent = "Bước " + state.stepIndex + " / " + (state.trace.steps.length - 1);
-  $("stepSlider").value = state.stepIndex;
-}
-
-function stopPlayback() {
-  if (state.timer !== null) clearInterval(state.timer);
-  state.timer = null;
-  state.isPlaying = false;
-}
-
-function changeStep(delta) {
-  stopPlayback();
-  state.stepIndex = Math.min(Math.max(state.stepIndex + delta, 0), state.trace.steps.length - 1);
-  render();
-}
-
-function getInterval() {
-  const settings = { 1: 1050, 2: 730, 3: 480, 4: 270, 5: 125 };
-  return settings[Number($("speedSlider").value)] || 480;
-}
-
-function startPlayback() {
-  if (state.isPlaying) {
-    stopPlayback();
-    render();
-    return;
-  }
-  if (state.stepIndex >= state.trace.steps.length - 1) state.stepIndex = 0;
-  state.components = null;
-  state.isPlaying = true;
-  render();
-  state.timer = setInterval(() => {
-    if (state.stepIndex < state.trace.steps.length - 1) {
-      state.stepIndex++;
-      if (state.stepIndex >= state.trace.steps.length - 1) stopPlayback();
-      render();
-    } else {
-      stopPlayback();
-      render();
-    }
-  }, getInterval());
-}
-
-function editCell(r, c) {
-  if (!inside(r, c)) return;
-  const isStart = r === state.start.r && c === state.start.c;
-  const isGoal = r === state.goal.r && c === state.goal.c;
-  if (state.tool === "start") {
-    if (isGoal) return;
-    state.start = { r, c };
-    state.grid[r][c] = ".";
-  } else if (state.tool === "goal") {
-    if (isStart) return;
-    state.goal = { r, c };
-    state.grid[r][c] = ".";
-  } else if (state.tool === "wall") {
-    if (isStart || isGoal) return;
-    state.grid[r][c] = "#";
-  } else if (state.tool === "erase") {
-    state.grid[r][c] = ".";
-  }
-  state.components = null;
+  document.querySelectorAll("[data-preset]").forEach((button)=>
+    button.classList.toggle("active",button.dataset.preset===name));
   calculateTrace();
 }
 
-function countComponents() {
-  const visited = new Uint8Array(state.rows * state.cols);
-  const components = new Int16Array(state.rows * state.cols).fill(-1);
-  let count = 0;
-  for (let r = 0; r < state.rows; r++) {
-    for (let c = 0; c < state.cols; c++) {
-      const first = indexOfCell(r, c);
-      if (!isOpen(r, c) || visited[first]) continue;
-      const stack = [first];
-      visited[first] = 1;
-      components[first] = count;
-      while (stack.length) {
-        const key = stack.pop();
-        const pos = keyToCoordinate(key);
-        for (const [dr, dc] of Object.values(DIRS)) {
-          const nr = pos.r + dr, nc = pos.c + dc;
-          if (!isOpen(nr, nc)) continue;
-          const next = indexOfCell(nr, nc);
-          if (visited[next]) continue;
-          visited[next] = 1;
-          components[next] = count;
-          stack.push(next);
-        }
-      }
-      count++;
+function resetMap() {
+  clearTimer();
+  state.grid=state.initialGrid.map((row)=>row.slice());
+  state.start={r:0,c:0};state.goal={r:state.rows-1,c:state.cols-1};
+  state.components=null;
+  state.challengeGuess=null;
+  if(state.challenge==="predict") {
+    loadChallenge("predict"); return;
+  }
+  calculateTrace();
+}
+
+function currentKey(frame) {
+  return frame.stack.length ? frame.stack[frame.stack.length-1] : -1;
+}
+function renderBoard(frame) {
+  const board=$("board"), col=$("columnAxis"), row=$("rowAxis");
+  board.style.setProperty("--cols",state.cols);
+  col.style.setProperty("--cols",state.cols);
+  row.style.setProperty("--rows",state.rows);
+  col.replaceChildren();row.replaceChildren();
+  for(let c=0;c<state.cols;c++){
+    const tag=document.createElement("span");tag.textContent=c;col.appendChild(tag);
+  }
+  for(let r=0;r<state.rows;r++){
+    const tag=document.createElement("span");tag.textContent=r;row.appendChild(tag);
+  }
+  const route=new Set(frame.path), active=currentKey(frame);
+  const cells=document.createDocumentFragment();
+  for(let r=0;r<state.rows;r++)for(let c=0;c<state.cols;c++){
+    const key=gridKey(r,c), wall=state.grid[r][c]==="#";
+    const start=state.start.r===r&&state.start.c===c;
+    const goal=state.goal.r===r&&state.goal.c===c;
+    const cell=document.createElement("button");
+    cell.type="button";cell.className="cell";cell.setAttribute("role","gridcell");
+    cell.dataset.r=r;cell.dataset.c=c;
+    if(wall)cell.classList.add("is-wall");
+    if(frame.visited[key])cell.classList.add("is-visited");
+    if(frame.backtracked[key])cell.classList.add("is-backtracked");
+    if(route.has(key))cell.classList.add("is-path");
+    if(state.components!==null && !wall && !frame.visited[key] && state.components[key]>=0)
+      cell.classList.add("is-component-"+state.components[key]%5);
+    if(start)cell.classList.add("is-start");
+    if(goal)cell.classList.add("is-goal");
+    if(key===active)cell.classList.add("is-current");
+    if(key===state.challengeGuess && state.challenge==="predict")cell.classList.add("is-guessed");
+    cell.setAttribute("aria-label","Hàng "+r+", cột "+c+", "+(wall?"tường":"ô trống")+
+      (start?", bắt đầu":"")+(goal?", đích":"")+
+      (frame.visited[key]?", thứ tự thăm "+frame.order[key]:""));
+    cell.title=coordText(r,c);
+    const label=document.createElement("span");
+    label.className="cell-label";
+    if(start)label.textContent="S";
+    else if(goal)label.textContent="E";
+    else if(frame.visited[key]){label.textContent=frame.order[key];label.classList.add("cell-number");}
+    cell.appendChild(label);cells.appendChild(cell);
+  }
+  board.replaceChildren(cells);
+  drawRoutes(frame);
+}
+
+function drawRoutes(frame) {
+  const svg=$("routeSvg"), board=$("board");
+  if(!svg||!board)return;
+  const rect=board.getBoundingClientRect();
+  svg.setAttribute("viewBox","0 0 "+Math.max(rect.width,1)+" "+Math.max(rect.height,1));
+  const buttons=[...board.querySelectorAll(".cell")];
+  function center(key) {
+    const el=buttons[key];if(!el)return null;
+    const r=el.getBoundingClientRect();
+    return [r.left-rect.left+r.width/2,r.top-rect.top+r.height/2];
+  }
+  function pairsPath(edges) {
+    let result="";
+    for(const [a,b] of edges) {
+      const p=center(a),q=center(b);
+      if(!p||!q)continue;
+      const dx=q[0]-p[0],dy=q[1]-p[1];
+      const length=Math.hypot(dx,dy)||1;
+      const offset=Math.min(14,length*.3);
+      result+="M"+(p[0]+dx*offset/length)+" "+(p[1]+dy*offset/length)+
+        " L"+(q[0]-dx*offset/length)+" "+(q[1]-dy*offset/length)+" ";
+    }
+    return result;
+  }
+  function walkPath(keys) {
+    const edges=[];
+    for(let i=1;i<keys.length;i++)edges.push([keys[i-1],keys[i]]);
+    return pairsPath(edges);
+  }
+  $("trailPath").setAttribute("d",pairsPath(frame.trail));
+  $("activePath").setAttribute("d",walkPath(frame.stack));
+  $("solutionPath").setAttribute("d",walkPath(frame.path));
+}
+
+function renderInspector(frame) {
+  $("visitedCount").textContent=frame.counter;
+  $("depthCount").textContent=frame.stack.length;
+  $("backtrackCount").textContent=frame.backtracks;
+  $("eventTitle").textContent=frame.title;
+  $("eventText").textContent=frame.description;
+  $("eventIcon").textContent=frame.type==="backtrack"?"↶":
+    frame.type==="found"?"✓":frame.type==="failed"?"×":"↳";
+  const stack=$("stackVisual");stack.replaceChildren();
+  if(frame.stack.length===0){const empty=document.createElement("span");empty.textContent="Chưa có ô nào";stack.appendChild(empty);}
+  else frame.stack.forEach((key,i)=>{
+    if(i){const arrow=document.createElement("span");arrow.className="stack-arrow";arrow.textContent="→";stack.appendChild(arrow);}
+    const tag=document.createElement("span");tag.className="stack-item";
+    const {r,c}=toCoord(key);tag.textContent=coordText(r,c);stack.appendChild(tag);
+  });
+  $("stackCount").textContent=frame.stack.length+" ô";
+  document.querySelectorAll("#pseudoCode [data-line]").forEach((line)=>
+    line.classList.toggle("current",Number(line.dataset.line)===frame.line));
+  const status=$("runStatus");
+  const final=state.stepIndex===state.trace.steps.length-1;
+  status.className="run-status";
+  if(state.isPlaying){status.textContent="Đang chạy";status.classList.add("busy");}
+  else if(final){status.textContent=state.trace.found?"Đã tới E":"Hết đường";status.classList.add(state.trace.found?"good":"bad");}
+  else if(state.stepIndex){status.textContent="Đang khám phá";status.classList.add("busy");}
+  else status.textContent="Sẵn sàng";
+  $("playLabel").textContent=state.isPlaying?"Tạm dừng":final?"Chạy lại":state.stepIndex?"Tiếp tục":"Chạy DFS";
+  $("playIcon").textContent=state.isPlaying?"Ⅱ":"▶";
+  $("prevBtn").disabled=state.stepIndex===0;
+  $("nextBtn").disabled=final;
+  const result=$("resultBox");
+  result.hidden=!final;
+  result.className="result";
+  if(final) {
+    if(state.trace.found){
+      const d=state.trace.route.length-1;
+      const bfs=state.trace.shortest.length-1;
+      result.textContent="Tới đích sau "+d+" bước. Đường ngắn nhất có "+bfs+
+        " bước. DFS không luôn chọn đường ngắn nhất.";
+    } else {
+      result.classList.add("no-path");
+      result.textContent="Không tìm được đường từ S tới E.";
     }
   }
-  return { count, components };
+}
+function render() {
+  if(!state.trace)return;
+  const frame=state.trace.steps[state.stepIndex];
+  $("mapSize").textContent=state.rows+" × "+state.cols;
+  renderBoard(frame);renderInspector(frame);
+  $("stepLabel").textContent="Bước "+state.stepIndex+" / "+(state.trace.steps.length-1);
+  $("stepSlider").value=state.stepIndex;
+}
+function changeStep(delta) {
+  clearTimer();
+  state.components=null;
+  state.stepIndex=Math.max(0,Math.min(state.trace.steps.length-1,state.stepIndex+delta));
+  render();
+}
+function stepDelay() {
+  return ({1:1000,2:690,3:470,4:270,5:140})[Number($("speedSlider").value)]||470;
+}
+function startPlayback() {
+  if(state.isPlaying){clearTimer();render();return;}
+  if(state.stepIndex>=state.trace.steps.length-1)state.stepIndex=0;
+  state.components=null;state.isPlaying=true;render();
+  state.timer=setInterval(()=>{
+    if(state.stepIndex<state.trace.steps.length-1)state.stepIndex++;
+    if(state.stepIndex>=state.trace.steps.length-1)clearTimer();
+    render();
+  },stepDelay());
+}
+function editCell(r,c){
+  if(!inside(r,c))return;
+  const start=state.start.r===r&&state.start.c===c;
+  const goal=state.goal.r===r&&state.goal.c===c;
+  if(state.tool==="start"){
+    if(goal)return;
+    state.start={r,c};state.grid[r][c]=".";
+  } else if(state.tool==="goal"){
+    if(start)return;
+    state.goal={r,c};state.grid[r][c]=".";
+  } else if(state.tool==="wall"){
+    if(start||goal)return;state.grid[r][c]="#";
+  } else if(state.tool==="erase"){
+    state.grid[r][c]=".";
+  }
+  state.components=null;
+  calculateTrace();
 }
 
-function loadChallenge(name) {
-  state.challenge = name;
-  loadPreset(name === "find" ? "maze" : name === "block" ? "block" : "islands", true);
-  const heading = {
-    find: "Thử thách 01 · Tìm đường",
-    block: "Thử thách 02 · Chặn đường",
-    islands: "Thử thách 03 · Đếm đảo"
-  };
-  const instruction = {
-    find: "Nhấn Chạy DFS và quan sát cho tới khi thuật toán tìm được E, sau đó quay lại kiểm tra.",
-    block: "Chọn Tường và sửa bản đồ để cắt mọi đường từ S đến E, rồi kiểm tra.",
-    islands: "Hãy đếm có bao nhiêu nhóm ô trống liên thông theo 4 hướng, nhập số dự đoán và kiểm tra."
-  };
-  $("challengeWorkspace").hidden = false;
-  $("challengeHeading").textContent = heading[name];
-  $("challengeInstruction").textContent = instruction[name];
-  $("guessLabel").hidden = name !== "islands";
-  $("challengeFeedback").textContent = "";
-  $("challengeFeedback").className = "challenge-feedback";
-  $("islandGuess").value = "";
-  document.getElementById("lab").scrollIntoView({ behavior: "smooth", block: "start" });
+function countComponents(){
+  const total=state.rows*state.cols;
+  const seen=new Uint8Array(total);
+  const components=new Int16Array(total).fill(-1);
+  let count=0;
+  for(let r=0;r<state.rows;r++)for(let c=0;c<state.cols;c++){
+    const key=gridKey(r,c);
+    if(!isOpen(r,c)||seen[key])continue;
+    const stack=[key];seen[key]=1;components[key]=count;
+    while(stack.length){
+      const at=stack.pop();
+      const pos=toCoord(at);
+      for(const [dr,dc] of Object.values(DIRS)){
+        const nr=pos.r+dr,nc=pos.c+dc;
+        if(!isOpen(nr,nc))continue;
+        const next=gridKey(nr,nc);
+        if(seen[next])continue;
+        seen[next]=1;components[next]=count;stack.push(next);
+      }
+    }
+    count++;
+  }
+  return {count,components};
 }
 
-function checkChallenge() {
-  const feedback = $("challengeFeedback");
-  let correct = false, message = "";
-  if (state.challenge === "find") {
-    correct = state.stepIndex === state.trace.steps.length - 1 && state.trace.found;
-    message = correct ? "Chính xác! DFS đã tìm được E. Hãy thử đổi thứ tự hướng và quan sát đường đi." :
-      "Hãy chạy mô phỏng tới khi tìm thấy đích E rồi kiểm tra lại.";
-  } else if (state.challenge === "block") {
-    correct = !state.trace.found;
-    message = correct ? "Xuất sắc! DFS không còn đường tới E. Bạn đã tách S và E thành hai vùng." :
-      "E vẫn đi tới được từ S. Hãy đặt thêm tường để chặn mọi lối đi.";
-  } else if (state.challenge === "islands") {
-    const result = countComponents();
-    const raw = $("islandGuess").value.trim();
-    if (raw === "") {
-      feedback.textContent = "Nhập số đảo bạn dự đoán trước khi kiểm tra.";
-      feedback.className = "challenge-feedback error";
+function loadChallenge(name){
+  state.challenge=name;
+  state.challengeGuess=null;
+  state.challengeTarget=-1;
+  loadPreset(name==="predict"?"classic":name==="block"?"deadend":"islands",true);
+  state.challenge=name;
+  const title={predict:"Bài 1. Đoán bước tiếp theo",block:"Bài 2. Chặn đường",islands:"Bài 3. Đếm vùng"};
+  const instructions={
+    predict:"DFS đã thăm S. Hãy chạm vào ô bạn nghĩ DFS sẽ thăm tiếp, rồi kiểm tra.",
+    block:"Chọn công cụ Tường, chặn mọi lối từ S tới E, rồi nhấn Kiểm tra.",
+    islands:"Nhìn bản đồ ở trên. Đếm số nhóm ô trống nối nhau theo 4 hướng."
+  };
+  $("challengeTitle").textContent=title[name];
+  $("challengeInstructions").textContent=instructions[name];
+  $("challengePanel").hidden=false;
+  $("guessLabel").hidden=name!=="islands";
+  $("checkChallengeBtn").textContent="Kiểm tra";
+  $("islandGuess").value="";
+  setFeedback("","");
+  if(name==="predict"){
+    state.stepIndex=1;
+    state.challengeTarget=state.trace.steps.findIndex((frame,index)=>index>1&&frame.type==="visit");
+    render();
+  }
+  $("lab").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function setFeedback(text,kind){
+  const box=$("challengeFeedback");
+  box.textContent=text;box.className="feedback"+(kind?" "+kind:"");
+}
+function checkChallenge(){
+  const name=state.challenge;
+  if(name==="predict"){
+    if(state.challengeGuess===null){setFeedback("Hãy chọn một ô trên bản đồ trước.","bad");return;}
+    const frame=state.trace.steps[state.challengeTarget];
+    const correct=frame&&gridKey(frame.r,frame.c)===state.challengeGuess;
+    if(correct){
+      state.stepIndex=state.challengeTarget;state.challengeGuess=null;render();
+      setFeedback("Đúng rồi. DFS chọn ô hợp lệ đầu tiên theo thứ tự ưu tiên.","good");
+    }else setFeedback("Chưa đúng. Xem hướng ưu tiên bên dưới rồi thử lại.","bad");
+  }else if(name==="block"){
+    const correct=!state.trace.found;
+    setFeedback(correct?"Chính xác. S và E đã bị tách khỏi nhau.":"Vẫn còn đường tới E. Thử thêm tường.",""+(correct?"good":"bad"));
+  }else if(name==="islands"){
+    const input=$("islandGuess").value.trim();
+    if(input===""){setFeedback("Nhập số vùng bạn dự đoán.","bad");return;}
+    const result=countComponents();
+    const correct=Number(input)===result.count;
+    clearTimer();state.components=result.components;state.stepIndex=0;render();
+    setFeedback((correct?"Chính xác. ":"Chưa đúng. ")+"Có "+result.count+" vùng. Mỗi màu là một nhóm ô nối nhau.",correct?"good":"bad");
+  }
+}
+
+const PALETTE=["#eeb180","#8bc1d7","#94bd94","#c4a4d6","#ead47e"];
+const PAINT_ORIGINAL=[
+  "001112222",
+  "001112222",
+  "000112222",
+  "333311222",
+  "333311444",
+  "333334444",
+  "333334444"
+];
+let paintGrid=[],paintTimer=null;
+function resetPaint(){
+  if(paintTimer!==null)clearInterval(paintTimer);
+  paintTimer=null;paintGrid=PAINT_ORIGINAL.map((row)=>row.split("").map(Number));
+  $("paintResult").textContent="Chọn một ô để tô";
+  drawPaint();
+}
+function drawPaint(active=-1){
+  const board=$("paintBoard"),frag=document.createDocumentFragment();
+  for(let r=0;r<paintGrid.length;r++)for(let c=0;c<paintGrid[0].length;c++){
+    const cell=document.createElement("button");cell.type="button";
+    cell.dataset.r=r;cell.dataset.c=c;cell.style.background=PALETTE[paintGrid[r][c]];
+    cell.title="Tô từ ô "+coordText(r,c);
+    cell.setAttribute("aria-label","Tô màu từ hàng "+r+", cột "+c);
+    if(active===r*9+c)cell.classList.add("paint-active");
+    frag.appendChild(cell);
+  }
+  board.replaceChildren(frag);
+}
+function floodFill(r,c){
+  if(paintTimer!==null)clearInterval(paintTimer);
+  paintTimer=null;
+  const original=paintGrid[r][c],next=(original+2)%PALETTE.length;
+  const stack=[[r,c]],seen=new Set([r*9+c]),region=[];
+  while(stack.length){
+    const [cr,cc]=stack.pop();region.push([cr,cc]);
+    for(const [dr,dc] of Object.values(DIRS)){
+      const nr=cr+dr,nc=cc+dc;
+      if(nr<0||nr>=7||nc<0||nc>=9)continue;
+      if(paintGrid[nr][nc]!==original||seen.has(nr*9+nc))continue;
+      seen.add(nr*9+nc);stack.push([nr,nc]);
+    }
+  }
+  let at=0;
+  $("paintResult").textContent="Đang loang màu...";
+  paintTimer=setInterval(()=>{
+    const [cr,cc]=region[at++];
+    paintGrid[cr][cc]=next;drawPaint(cr*9+cc);
+    if(at>=region.length){
+      clearInterval(paintTimer);paintTimer=null;drawPaint();
+      $("paintResult").textContent="Đã tô "+region.length+" ô";
+    }
+  },85);
+}
+
+function makeMazePreview(){
+  const board=$("mazePreview"),map=parseMap(PRESETS.classic);
+  const seen=new Uint8Array(map.length*map[0].length);
+  const parent=new Int32Array(map.length*map[0].length).fill(-1);
+  const queue=[0];seen[0]=1;let head=0;
+  while(head<queue.length){
+    const key=queue[head++],r=Math.floor(key/9),c=key%9;
+    for(const [dr,dc] of Object.values(DIRS)){
+      const nr=r+dr,nc=c+dc,next=nr*9+nc;
+      if(nr<0||nr>=7||nc<0||nc>=9||map[nr][nc]==="#"||seen[next])continue;
+      seen[next]=1;parent[next]=key;queue.push(next);
+    }
+  }
+  const route=new Set();let at=62;
+  while(at>=0&&!route.has(at)){route.add(at);at=parent[at];}
+  const frag=document.createDocumentFragment();
+  for(let r=0;r<7;r++)for(let c=0;c<9;c++){
+    const key=r*9+c,el=document.createElement("span");
+    if(map[r][c]==="#")el.classList.add("m-wall");
+    if(route.has(key))el.classList.add("m-route");
+    if(key===0){el.classList.add("m-start");el.textContent="S";}
+    if(key===62){el.classList.add("m-goal");el.textContent="E";}
+    frag.appendChild(el);
+  }
+  board.replaceChildren(frag);
+}
+
+const islandPreviewMap=parseMap(PRESETS.islands);
+function previewIslandGroups(){
+  const component=new Int16Array(63).fill(-1),seen=new Uint8Array(63);
+  let count=0;
+  for(let r=0;r<7;r++)for(let c=0;c<9;c++){
+    const key=r*9+c;
+    if(islandPreviewMap[r][c]==="#"||seen[key])continue;
+    const stack=[key];seen[key]=1;component[key]=count;
+    while(stack.length){
+      const at=stack.pop(),cr=Math.floor(at/9),cc=at%9;
+      for(const [dr,dc] of Object.values(DIRS)){
+        const nr=cr+dr,nc=cc+dc,next=nr*9+nc;
+        if(nr<0||nr>=7||nc<0||nc>=9||islandPreviewMap[nr][nc]==="#"||seen[next])continue;
+        seen[next]=1;component[next]=count;stack.push(next);
+      }
+    }
+    count++;
+  }
+  return {count,component};
+}
+function renderIslandPreview(showGroups=false){
+  const board=$("islandBoard"),frag=document.createDocumentFragment();
+  const {count,component}=previewIslandGroups();
+  for(let r=0;r<7;r++)for(let c=0;c<9;c++){
+    const key=r*9+c,el=document.createElement("span");
+    if(islandPreviewMap[r][c]==="."){
+      el.classList.add("land");
+      if(showGroups)el.classList.add("group-"+component[key]%6);
+    }
+    frag.appendChild(el);
+  }
+  board.replaceChildren(frag);
+  $("islandResult").textContent=showGroups?count+" đảo":"? đảo";
+  $("countIslandsBtn").textContent=showGroups?"Ẩn màu ↺":"Đếm bằng DFS →";
+  return count;
+}
+
+function bindEvents(){
+  $("board").addEventListener("click",(event)=>{
+    const el=event.target.closest(".cell");if(!el)return;
+    const r=Number(el.dataset.r),c=Number(el.dataset.c);
+    if(state.challenge==="predict"){
+      state.challengeGuess=gridKey(r,c);
+      render();
+      setFeedback("Đã chọn ô "+coordText(r,c)+". Nhấn Kiểm tra.","");
       return;
     }
-    const guess = Number(raw);
-    correct = guess === result.count;
-    message = correct ? "Đúng rồi! Có " + result.count + " đảo. Mỗi màu là một vùng liên thông." :
-      "Chưa chính xác. Có " + result.count + " đảo. Các nhóm màu giúp bạn xem lại.";
-    stopPlayback();
-    state.stepIndex = 0;
-    state.components = result.components;
-    render();
-  }
-  feedback.textContent = message;
-  feedback.className = "challenge-feedback " + (correct ? "success" : "error");
-}
-
-function updateQuizScore() {
-  const answered = state.quizAnswers.filter((x) => x !== null).length;
-  const score = state.quizAnswers.reduce((sum, value, i) => sum + (value === ANSWERS[i] ? 1 : 0), 0);
-  $("quizScore").textContent = score + "/3";
-  $("quizMessage").textContent = answered === 3 ?
-    (score === 3 ? "Hoàn hảo! Bạn đã nắm được nguyên lý DFS." : "Hoàn thành " + score + "/3 câu. Đọc giải thích và thử lại nhé.") :
-    "Đã trả lời " + answered + "/3 câu.";
-}
-
-function answerQuiz(card, value) {
-  const index = Number(card.dataset.question);
-  if (state.quizAnswers[index] !== null) return;
-  state.quizAnswers[index] = value;
-  card.querySelectorAll("[data-answer]").forEach((button) => {
-    const selected = Number(button.dataset.answer);
-    button.disabled = true;
-    if (selected === ANSWERS[index]) button.classList.add("correct");
-    if (selected === value && value !== ANSWERS[index]) button.classList.add("wrong");
+    editCell(r,c);
   });
-  const feedback = card.querySelector(".quiz-feedback");
-  feedback.textContent = (value === ANSWERS[index] ? "✓ Đúng! " : "✕ Chưa đúng. ") + EXPLANATIONS[index];
-  updateQuizScore();
-}
-
-function resetQuiz() {
-  state.quizAnswers = [null, null, null];
-  document.querySelectorAll(".quiz-card").forEach((card) => {
-    card.querySelectorAll("[data-answer]").forEach((button) => {
-      button.disabled = false;
-      button.classList.remove("correct", "wrong");
+  document.querySelectorAll("[data-preset]").forEach((button)=>
+    button.addEventListener("click",()=>loadPreset(button.dataset.preset)));
+  $("randomBtn").addEventListener("click",()=>loadPreset("random"));
+  $("resetMapBtn").addEventListener("click",resetMap);
+  $("editorTools").addEventListener("click",(event)=>{
+    const button=event.target.closest("[data-tool]");if(!button)return;
+    state.tool=button.dataset.tool;
+    document.querySelectorAll("[data-tool]").forEach((el)=>{
+      el.classList.toggle("active",el===button);
+      el.setAttribute("aria-pressed",String(el===button));
     });
-    card.querySelector(".quiz-feedback").textContent = "";
+    if(state.challenge==="predict"){state.challenge=null;$("challengePanel").hidden=true;}
   });
-  updateQuizScore();
-}
-
-function bindEvents() {
-  $("board").addEventListener("click", (event) => {
-    const cell = event.target.closest(".cell");
-    if (cell) editCell(Number(cell.dataset.r), Number(cell.dataset.c));
+  $("directionSelect").addEventListener("change",calculateTrace);
+  $("playBtn").addEventListener("click",startPlayback);
+  $("prevBtn").addEventListener("click",()=>changeStep(-1));
+  $("nextBtn").addEventListener("click",()=>changeStep(1));
+  $("resetTraceBtn").addEventListener("click",()=>{
+    clearTimer();state.stepIndex=0;state.components=null;render();
   });
-
-  $("editorTools").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-tool]");
-    if (!button) return;
-    state.tool = button.dataset.tool;
-    document.querySelectorAll("[data-tool]").forEach((el) => {
-      const active = el === button;
-      el.classList.toggle("active", active);
-      el.setAttribute("aria-pressed", String(active));
-    });
+  $("stepSlider").addEventListener("input",(event)=>{
+    clearTimer();state.stepIndex=Number(event.target.value);state.components=null;render();
   });
-
-  $("presetSelect").addEventListener("change", (event) => loadPreset(event.target.value));
-  $("directionSelect").addEventListener("change", () => calculateTrace());
-  $("randomBtn").addEventListener("click", () => loadPreset("random"));
-  $("resetMapBtn").addEventListener("click", () => loadPreset(state.preset));
-  $("playBtn").addEventListener("click", startPlayback);
-  $("prevBtn").addEventListener("click", () => changeStep(-1));
-  $("nextBtn").addEventListener("click", () => changeStep(1));
-  $("resetTraceBtn").addEventListener("click", () => {
-    stopPlayback();
-    state.stepIndex = 0;
-    state.components = null;
-    render();
+  $("speedSlider").addEventListener("input",()=>{
+    if(state.isPlaying){clearTimer();startPlayback();}
   });
-  $("stepSlider").addEventListener("input", (event) => {
-    stopPlayback();
-    state.stepIndex = Number(event.target.value);
-    state.components = null;
-    render();
+  $("openMazeBtn").addEventListener("click",()=>{
+    loadPreset("classic");$("lab").scrollIntoView({behavior:"smooth"});
   });
-  $("speedSlider").addEventListener("input", () => {
-    if (state.isPlaying) {
-      stopPlayback();
-      startPlayback();
-    }
+  $("paintBoard").addEventListener("click",(event)=>{
+    const button=event.target.closest("button");if(button)floodFill(Number(button.dataset.r),Number(button.dataset.c));
   });
-  document.querySelectorAll("[data-challenge]").forEach((button) => {
-    button.addEventListener("click", () => loadChallenge(button.dataset.challenge));
+  $("paintResetBtn").addEventListener("click",resetPaint);
+  let islandColored=false;
+  $("countIslandsBtn").addEventListener("click",()=>{
+    islandColored=!islandColored;renderIslandPreview(islandColored);
   });
-  $("checkChallengeBtn").addEventListener("click", checkChallenge);
-  $("islandGuess").addEventListener("keydown", (event) => {
-    if (event.key === "Enter") checkChallenge();
-  });
-  document.querySelectorAll(".quiz-card").forEach((card) => {
-    card.addEventListener("click", (event) => {
-      const option = event.target.closest("[data-answer]");
-      if (option) answerQuiz(card, Number(option.dataset.answer));
-    });
-  });
-  $("resetQuizBtn").addEventListener("click", resetQuiz);
-  document.addEventListener("keydown", (event) => {
-    const tag = document.activeElement?.tagName;
-    if (tag === "INPUT" || tag === "SELECT" || tag === "BUTTON" || tag === "TEXTAREA") return;
-    if (event.key === "ArrowRight") changeStep(1);
-    if (event.key === "ArrowLeft") changeStep(-1);
+  document.querySelectorAll("[data-challenge]").forEach((button)=>
+    button.addEventListener("click",()=>loadChallenge(button.dataset.challenge)));
+  $("checkChallengeBtn").addEventListener("click",checkChallenge);
+  $("islandGuess").addEventListener("keydown",(event)=>{if(event.key==="Enter")checkChallenge();});
+  window.addEventListener("resize",()=>{
+    if(state.trace)drawRoutes(state.trace.steps[state.stepIndex]);
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  $("currentYear").textContent = new Date().getFullYear();
+document.addEventListener("DOMContentLoaded",()=>{
   bindEvents();
   loadPreset("classic");
-  updateQuizScore();
+  resetPaint();
+  makeMazePreview();
+  renderIslandPreview(false);
 });

@@ -1,46 +1,34 @@
-# DFS Visual Lab
+# DFS Lab
 
-Website tiếng Việt giúp học và luyện tập DFS (Depth-First Search) trên ma trận 2 chiều.
+Website học DFS trên ma trận 2 chiều, ưu tiên hình ảnh và thao tác trực tiếp.
 
-## Phiên bản V1
+Trang công khai: https://dfs-visual-lab.vercel.app/
 
-- Mô phỏng DFS từng bước, tự chạy / tạm dừng / tua lại và điều chỉnh tốc độ.
-- Hiển thị thứ tự thăm ô, ô hiện tại, ngăn xếp đệ quy, quay lui và dòng mã giả.
-- Sửa mê cung bằng cách đặt tường, xóa tường, di chuyển điểm S và E.
-- Bản đồ cơ bản, mê cung ngoằn ngoèo, nhiều đảo, bản đồ trống và ngẫu nhiên.
-- Thay đổi thứ tự duyệt 4 hướng; so sánh độ dài đường DFS với BFS ngắn nhất.
-- 3 thử thách: tìm đường, chặn đường và đếm đảo (DFS flood fill).
-- 3 câu hỏi trắc nghiệm có đáp án và giải thích.
-- Responsive cho điện thoại, máy tính; không cần tài khoản hay backend.
+## Có gì trên web
+
+- Mô phỏng DFS trên lưới, có đường đang đi, ô đã thăm, ô quay lui.
+- Từng bước, chạy và tạm dừng, tua lại, chỉnh tốc độ và thứ tự hướng.
+- Tự xây bản đồ, đổi điểm S và E, thử mê cung hoặc bản đồ ngẫu nhiên.
+- Ứng dụng trực quan: tìm lối ra, loang màu, đếm số đảo.
+- 3 bài tập: đoán ô tiếp theo, chặn đường, đếm vùng.
+- Mã giả và giải thích ngắn, đúng cơ chế đánh dấu và quay lui.
+- Dùng được trên máy tính và điện thoại, không cần đăng nhập.
 
 ## Chạy trên máy
 
-Mở index.html trong trình duyệt hoặc chạy một web server tĩnh:
+Mở index.html hoặc chạy:
 
     python -m http.server 8080
 
-Sau đó mở http://localhost:8080.
+Sau đó truy cập http://localhost:8080.
 
-## Deploy
+Kiểm thử thuật toán:
 
-Dự án là website tĩnh (HTML/CSS/JavaScript), không cần build. Có thể deploy lên Vercel, Netlify hoặc GitHub Pages.
+    node test.cjs
 
-## Quy ước mô phỏng
+## Tài liệu tham khảo
 
-- Toạ độ dùng chỉ số bắt đầu từ 0, định dạng (hàng, cột).
-- Ô trống . được đi qua; ô tường # không được đi qua.
-- DFS dùng đệ quy, đánh dấu ô ngay lần thăm đầu tiên.
-- Mỗi sự kiện thăm / quay lui được lưu thành một frame để tua bước.
-- DFS tìm một đường tới E chứ không đảm bảo đường ngắn nhất.
-- Bài đếm đảo coi các ô trống nối theo bốn hướng là cùng một vùng liên thông.
+- VisuAlgo, Graph Traversal: https://visualgo.net/en/dfsbfs
+- EntCS, Graph traversal visualiser: https://entcs.org/tools/graph-traversal-visualizer
 
-## Cấu trúc
-
-- index.html — giao diện học và phòng thí nghiệm.
-- styles.css — phong cách, hoạt ảnh và responsive.
-- app.js — DFS, BFS, thao tác bản đồ và bài luyện tập.
-- favicon.svg — biểu tượng website.
-
-## Giấy phép
-
-MIT.
+Mọi hình minh họa và mã nguồn trang web được triển khai riêng cho DFS Lab.

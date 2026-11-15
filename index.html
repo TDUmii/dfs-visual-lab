@@ -1,129 +1,144 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f6f7fb" />
-  <meta name="description" content="DFS Visual Lab — học tìm kiếm theo chiều sâu trên ma trận 2 chiều bằng mô phỏng từng bước, viết mê cung và làm bài luyện tập." />
-  <title>DFS Visual Lab — Học DFS trực quan</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="styles.css" />
-  <script src="app.js" defer></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f7f3">
+  <meta name="description" content="Học DFS trên ma trận 2 chiều bằng mô phỏng, loang màu, đếm đảo và bài tập tương tác.">
+  <title>DFS Lab | Học DFS trực quan</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
 </head>
 <body>
-  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
-  <header class="site-header">
-    <div class="page-container header-inner">
-      <a class="brand" href="#home" aria-label="DFS Visual Lab — về đầu trang"><span class="brand-symbol" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>DFS<span class="brand-light">visual lab</span></span></a>
-      <nav class="header-nav" aria-label="Điều hướng"><a href="#lab">Phòng thực hành</a><a href="#learn">Kiến thức</a><a href="#practice">Luyện tập</a></nav>
-      <a class="header-action" href="#lab">Bắt đầu học <span aria-hidden="true">↗</span></a>
-    </div>
-  </header>
-  <main id="home">
-    <section class="hero page-container">
-      <div class="hero-main">
-        <div class="eyebrow"><span class="pulse-dot"></span> HỌC THUẬT TOÁN THEO CÁCH DỄ HIỂU</div>
-        <h1>Hiểu DFS bằng<br/><span class="gradient-text">cách nhìn nó chạy.</span></h1>
-        <p class="hero-copy">Đi sâu một ô, khám phá những ô kế tiếp, rồi quay lui khi hết đường. Tự xây mê cung và xem từng bước DFS tìm đường trong ma trận 2 chiều.</p>
-        <div class="hero-buttons"><a href="#lab" class="btn btn-primary">Khám phá mô phỏng <span aria-hidden="true">↗</span></a><a href="#learn" class="btn btn-quiet">DFS là gì? <span aria-hidden="true">↓</span></a></div>
-        <div class="hero-notes"><span><span class="check-mark">✓</span> Miễn phí</span><span><span class="check-mark">✓</span> Không cần đăng nhập</span><span><span class="check-mark">✓</span> Học trên điện thoại</span></div>
-      </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="art-orbit art-orbit-one"></div><div class="art-orbit art-orbit-two"></div>
-        <div class="floating-label floating-top"><span class="mini-icon violet">↳</span> dfs(1, 2)</div>
-        <div class="art-board">
-          <div class="art-row"><b class="art-start">S</b><b class="art-trace">1</b><b class="art-wall"></b><b></b><b></b></div>
-          <div class="art-row"><b class="art-wall"></b><b class="art-trace">2</b><b class="art-wall"></b><b></b><b></b></div>
-          <div class="art-row"><b></b><b class="art-trace">3</b><b class="art-trace">4</b><b class="art-trace">5</b><b class="art-wall"></b></div>
-          <div class="art-row"><b></b><b class="art-wall"></b><b class="art-wall"></b><b class="art-trace">6</b><b class="art-wall"></b></div>
-          <div class="art-row"><b></b><b></b><b></b><b class="art-trace">7</b><b class="art-goal">E</b></div>
-        </div>
-        <div class="floating-label floating-bottom"><span class="live-led"></span> Đang khám phá <strong>7 ô</strong></div>
-        <span class="art-sparkle art-s1">✳</span><span class="art-sparkle art-s2">✦</span>
-      </div>
+<header class="site-head">
+  <div class="shell head-row">
+    <a href="#home" class="logo"><span class="logo-mark"><i></i><i></i><i></i><i></i></span><strong>DFS Lab</strong></a>
+    <nav aria-label="Điều hướng"><a href="#lab">Mô phỏng</a><a href="#applications">Ứng dụng</a><a href="#practice">Bài tập</a></nav>
+    <a class="head-cta" href="#lab">Thử ngay <span>↗</span></a>
+  </div>
+</header>
+<main id="home">
+  <div class="shell">
+    <section class="intro">
+      <div><span class="chapter-mark">THUẬT TOÁN / 01</span><h1>DFS trên ma trận <span>2 chiều.</span></h1><p>Đi sâu đến khi hết đường, rồi quay lại thử hướng khác. Nhấn <b>Từng bước</b> để nhìn rõ cách DFS hoạt động.</p></div>
+      <div class="idea-line" aria-label="Ba bước của DFS"><span><b>01</b> Thăm ô</span><span class="idea-arrow">→</span><span><b>02</b> Đi sâu</span><span class="idea-arrow">→</span><span><b>03</b> Quay lui</span></div>
     </section>
 
-    <section class="lab-section page-container" id="lab">
-      <div class="section-title-row">
-        <div><div class="section-kicker">01 / TRẢI NGHIỆM</div><h2>Phòng thực hành DFS</h2><p>Chọn bản đồ, đặt điểm bắt đầu và nhấn chạy để quan sát thuật toán.</p></div>
-        <div class="section-pill">● Interactive playground</div>
-      </div>
-
-      <div class="lab-shell">
-        <div class="lab-toolbar">
-          <div class="toolbar-select-wrap"><label for="presetSelect">Bản đồ</label><select id="presetSelect"><option value="classic">Mê cung cơ bản</option><option value="maze">Mê cung ngoằn ngoèo</option><option value="islands">Nhiều vùng tách biệt</option><option value="blank">Bản đồ trống</option><option value="random">Bản đồ ngẫu nhiên</option></select></div>
-          <div class="toolbar-select-wrap"><label for="directionSelect">Ưu tiên hướng</label><select id="directionSelect"><option value="down,right,up,left">Xuống → Phải → Lên → Trái</option><option value="right,down,left,up">Phải → Xuống → Trái → Lên</option><option value="up,right,down,left">Lên → Phải → Xuống → Trái</option><option value="left,up,right,down">Trái → Lên → Phải → Xuống</option></select></div>
-          <div class="toolbar-actions"><button id="randomBtn" class="icon-button" title="Tạo bản đồ ngẫu nhiên" aria-label="Tạo bản đồ ngẫu nhiên">⤨</button><button id="resetMapBtn" class="icon-button" title="Khôi phục bản đồ" aria-label="Khôi phục bản đồ">↺</button></div>
-        </div>
-
-        <div class="lab-body">
-          <div class="board-panel">
-            <div class="panel-heading"><div><span class="heading-kicker">MA TRẬN 2 CHIỀU</span><h3>Khám phá từng ô <span id="gridSize" class="text-muted">7 × 9</span></h3></div><span class="status-pill" id="runStatus"><span class="status-dot"></span> Sẵn sàng</span></div>
-            <div class="editor-tools" aria-label="Công cụ sửa ma trận">
-              <span class="tool-caption">Chạm vào ô để:</span>
-              <div class="segmented-tools" id="editorTools">
-                <button data-tool="wall" class="tool-item active" aria-pressed="true"><span class="tool-swatch wall-swatch"></span> Tường</button>
-                <button data-tool="erase" class="tool-item" aria-pressed="false"><span class="tool-swatch erase-swatch"></span> Xóa tường</button>
-                <button data-tool="start" class="tool-item" aria-pressed="false"><span class="tool-swatch start-swatch"></span> Bắt đầu</button>
-                <button data-tool="goal" class="tool-item" aria-pressed="false"><span class="tool-swatch goal-swatch"></span> Đích</button>
-              </div>
-            </div>
-            <div class="matrix-frame"><div class="axis-top" id="columnAxis" aria-hidden="true"></div><div class="axis-layout"><div class="axis-left" id="rowAxis" aria-hidden="true"></div><div id="board" class="board" role="grid" aria-label="Ma trận DFS. Chọn công cụ rồi nhấn một ô để thay đổi."></div></div></div>
-            <div class="legend"><span><i class="lg-start"></i> Bắt đầu</span><span><i class="lg-goal"></i> Đích</span><span><i class="lg-wall"></i> Tường</span><span><i class="lg-visited"></i> Đã thăm</span><span><i class="lg-active"></i> Đang xét</span></div>
-            <div class="player-controls">
-              <div class="control-buttons">
-                <button class="btn btn-run" id="playBtn"><span id="playIcon">▶</span> <span id="playText">Chạy DFS</span></button>
-                <button class="btn btn-step" id="prevBtn" aria-label="Lùi một bước">←</button>
-                <button class="btn btn-step" id="nextBtn">Từng bước →</button>
-                <button class="btn btn-reset" id="resetTraceBtn" title="Đưa mô phỏng về bước 0" aria-label="Đưa mô phỏng về bước 0">↺</button>
-              </div>
-              <div class="scrubber"><span class="scrubber-label" id="stepLabel">Bước 0 / 0</span><input id="stepSlider" type="range" min="0" max="0" value="0" aria-label="Chọn bước mô phỏng" /><label for="speedSlider">Tốc độ</label><input id="speedSlider" type="range" min="1" max="5" value="3" aria-label="Tốc độ chạy" /></div>
-            </div>
-            <div class="board-hint">Mẹo: Bạn có thể chọn <strong>Tường</strong>, bấm vào các ô để tạo mê cung, sau đó chọn <strong>Từng bước</strong> để tự theo dõi DFS.</div>
+    <section id="lab" class="workspace-section">
+      <div class="section-head"><div><h2>Thử trực tiếp</h2><p>Thay đổi mê cung rồi xem thuật toán chạy trên chính bản đồ của bạn.</p></div><span class="section-note">S = bắt đầu &nbsp; E = đích</span></div>
+      <div class="workspace">
+        <div class="map-column">
+          <div class="preset-bar" role="group" aria-label="Chọn bản đồ">
+            <button data-preset="classic" class="preset active">Cơ bản</button>
+            <button data-preset="deadend" class="preset">Ngõ cụt</button>
+            <button data-preset="islands" class="preset">Nhiều vùng</button>
+            <button data-preset="blank" class="preset">Trống</button>
+            <button id="randomBtn" class="preset random-preset" title="Tạo bản đồ ngẫu nhiên">⤨ Ngẫu nhiên</button>
           </div>
-
-          <aside class="inspector-panel">
-            <div class="inspector-title"><div><span class="heading-kicker">GIẢI THÍCH THỜI GIAN THỰC</span><h3>DFS đang làm gì?</h3></div><span class="inspector-indicator">LIVE</span></div>
-            <div class="live-explanation"><div class="explanation-icon" id="explanationIcon">◎</div><div><strong id="explanationTitle">Chưa bắt đầu</strong><p id="explanationText" aria-live="polite">Nhấn Chạy DFS hoặc Từng bước để thấy cách thuật toán khám phá từng ô.</p></div></div>
-            <div class="metrics"><div><span>Đã thăm</span><strong id="visitedCount">0</strong><small>ô</small></div><div><span>Độ sâu</span><strong id="depthCount">0</strong><small>mức</small></div><div><span>Quay lui</span><strong id="backtrackCount">0</strong><small>lần</small></div></div>
-            <div class="inspector-subsection"><div class="inspector-subheading"><strong>Ngăn xếp đệ quy</strong><span id="stackDepthLabel">0 hàm</span></div><div class="stack-visual" id="stackVisual"><span class="empty-copy">Chưa có lời gọi dfs()</span></div><p class="micro-copy">Hàm nằm ở cuối danh sách là lời gọi đang xử lý.</p></div>
-            <div class="inspector-subsection"><div class="inspector-subheading"><strong>Mã giả DFS</strong><span>C++ / tư duy</span></div><div class="code-panel" id="pseudoCode"><div data-line="1"><em>1</em><code><span class="code-fn">dfs</span>(r, c) {</code></div><div data-line="2"><em>2</em><code>  <span class="code-key">if</span> (khongHopLe || daTham) <span class="code-key">return</span>;</code></div><div data-line="3"><em>3</em><code>  daTham[r][c] = <span class="code-key">true</span>;</code></div><div data-line="4"><em>4</em><code>  themVaoNganXep(r, c);</code></div><div data-line="5"><em>5</em><code>  <span class="code-key">if</span> (laDich) <span class="code-key">return true</span>;</code></div><div data-line="6"><em>6</em><code>  <span class="code-key">for</span> (oKe trong 4 huong) {</code></div><div data-line="7"><em>7</em><code>    <span class="code-fn">dfs</span>(oKe.hang, oKe.cot);</code></div><div data-line="8"><em>8</em><code>  } <span class="code-comment">// lui khi het duong</span></code></div><div data-line="9"><em>9</em><code>  xoaKhoiNganXep();</code></div><div data-line="10"><em>10</em><code>}</code></div></div><p class="micro-copy">Mã giả minh họa luồng ý tưởng; thuật toán thật có kiểm tra kết quả để dừng khi gặp đích.</p></div>
-            <div id="resultBox" class="result-box" hidden></div>
-          </aside>
+          <div class="board-caption"><strong>Bản đồ <span id="mapSize">7 × 9</span></strong><span>Chạm ô để chỉnh sửa</span></div>
+          <div class="board-frame">
+            <div id="columnAxis" class="axis-top" aria-hidden="true"></div>
+            <div class="axis-bottom">
+              <div id="rowAxis" class="axis-side" aria-hidden="true"></div>
+              <div class="board-stack">
+                <div id="board" class="board" role="grid" aria-label="Ma trận DFS tương tác"></div>
+                <svg id="routeSvg" class="route-svg" aria-hidden="true" preserveAspectRatio="none"><path id="trailPath" class="trail-path"></path><path id="activePath" class="active-path"></path><path id="solutionPath" class="solution-path"></path></svg>
+              </div>
+            </div>
+          </div>
+          <div class="legend"><span><i class="start-l"></i>Bắt đầu</span><span><i class="goal-l"></i>Đích</span><span><i class="visited-l"></i>Đã thăm</span><span><i class="active-l"></i>Đang xét</span><span><i class="wall-l"></i>Tường</span></div>
+          <div class="editor">
+            <span class="editor-label">Vẽ bản đồ</span>
+            <div id="editorTools" class="editor-actions" role="group" aria-label="Công cụ vẽ">
+              <button data-tool="wall" class="edit-tool active" aria-pressed="true"><span class="tool-icon dark-tool"></span>Tường</button>
+              <button data-tool="erase" class="edit-tool" aria-pressed="false"><span class="tool-icon empty-tool"></span>Xóa</button>
+              <button data-tool="start" class="edit-tool" aria-pressed="false"><span class="tool-icon green-tool"></span>Đặt S</button>
+              <button data-tool="goal" class="edit-tool" aria-pressed="false"><span class="tool-icon orange-tool"></span>Đặt E</button>
+            </div>
+            <button id="resetMapBtn" class="reset-map" title="Khôi phục bản đồ">↺</button>
+          </div>
+        </div>
+        <aside class="info-column">
+          <div class="info-top"><h3>Đang diễn ra</h3><span id="runStatus" class="run-status">Sẵn sàng</span></div>
+          <div class="action-callout">
+            <div id="eventIcon" class="event-icon">↳</div>
+            <div><strong id="eventTitle">Bắt đầu tại S</strong><p id="eventText">Nhấn Từng bước hoặc Chạy để quan sát.</p></div>
+          </div>
+          <div class="stats"><div><strong id="visitedCount">0</strong><span>Ô đã thăm</span></div><div><strong id="depthCount">0</strong><span>Độ sâu</span></div><div><strong id="backtrackCount">0</strong><span>Quay lui</span></div></div>
+          <div class="stack-top"><strong>Đường đang đi</strong><span id="stackCount">0 ô</span></div>
+          <div id="stackVisual" class="stack-visual" aria-live="polite"><span>Chưa có ô nào</span></div>
+          <div class="code-top"><strong>Mã giả</strong><span>4 hướng</span></div>
+          <div id="pseudoCode" class="code-box" aria-label="Mã giả DFS">
+            <div data-line="1"><em>1</em><code>bool dfs(int hang, int cot) {</code></div>
+            <div data-line="2"><em>2</em><code>  if (biChan || daTham) return false;</code></div>
+            <div data-line="3"><em>3</em><code>  daTham[hang][cot] = true;</code></div>
+            <div data-line="4"><em>4</em><code>  if (laDich) return true;</code></div>
+            <div data-line="5"><em>5</em><code>  for (oKe : bonHuong) {</code></div>
+            <div data-line="6"><em>6</em><code>    if (dfs(oKe)) return true;</code></div>
+            <div data-line="7"><em>7</em><code>  } return false; // quay lui</code></div>
+            <div data-line="8"><em>8</em><code>}</code></div>
+          </div>
+          <p class="tiny-hint">Đường tím là lời gọi đang hoạt động. Khi ngõ cụt, DFS trở lại ô trước.</p>
+          <div id="resultBox" class="result" hidden></div>
+        </aside>
+        <div class="playbar">
+          <div class="buttons"><button id="playBtn" class="play-main"><span id="playIcon">▶</span> <span id="playLabel">Chạy DFS</span></button><button id="prevBtn" class="step-btn" aria-label="Lùi một bước">←</button><button id="nextBtn" class="step-btn">Từng bước →</button><button id="resetTraceBtn" class="step-btn" aria-label="Chạy từ đầu">↺</button></div>
+          <div class="timeline"><span id="stepLabel">Bước 0 / 0</span><input id="stepSlider" type="range" min="0" max="0" value="0" aria-label="Chọn bước DFS"><label for="speedSlider">Tốc độ</label><input id="speedSlider" type="range" min="1" max="5" value="3" aria-label="Tốc độ mô phỏng"></div>
+          <div class="direction-row"><label for="directionSelect">Đi theo hướng</label><select id="directionSelect"><option value="down,right,up,left">Xuống, phải, lên, trái</option><option value="right,down,left,up">Phải, xuống, trái, lên</option><option value="up,right,down,left">Lên, phải, xuống, trái</option><option value="left,up,right,down">Trái, lên, phải, xuống</option></select></div>
         </div>
       </div>
-      <div class="bottom-insight"><span class="insight-icon">i</span><p><strong>Lưu ý:</strong> DFS đi sâu trước khi quay lui, nhưng không đảm bảo đường đi ngắn nhất. Thay đổi thứ tự ưu tiên hướng để thấy đường đi có thể khác nhau.</p></div>
     </section>
 
-    <section class="learn-section page-container" id="learn">
-      <div class="section-title-row"><div><div class="section-kicker">02 / NẮM CỐT LÕI</div><h2>Chỉ cần nhớ 3 điều</h2><p>DFS không khó khi bạn hiểu cách nó lựa chọn và quay lại.</p></div></div>
-      <div class="lesson-grid">
-        <article class="lesson-card"><div class="lesson-number">01</div><div class="lesson-symbol lesson-blue">➜</div><h3>Đi sâu hết mức</h3><p>Từ một ô, DFS thử ô kề đầu tiên hợp lệ và cứ tiếp tục đi sâu. Nó không khám phá tất cả các ô cùng lúc.</p><div class="lesson-footer">Ưu tiên một nhánh trước</div></article>
-        <article class="lesson-card"><div class="lesson-number">02</div><div class="lesson-symbol lesson-purple">↶</div><h3>Hết đường thì quay lui</h3><p>Nếu không còn ô kề hợp lệ, DFS trở về lời gọi trước và thử hướng khác. Đây chính là <strong>backtracking</strong>.</p><div class="lesson-footer">Ngăn xếp / đệ quy</div></article>
-        <article class="lesson-card"><div class="lesson-number">03</div><div class="lesson-symbol lesson-teal">✓</div><h3>Đánh dấu đã thăm</h3><p>Mỗi ô chỉ được duyệt một lần. Mảng <strong>daTham</strong> giúp tránh lặp vô hạn giữa các ô đã khám phá.</p><div class="lesson-footer">Thời gian: O(hàng × cột)</div></article>
+    <section id="learn" class="concept-section">
+      <div class="section-head"><div><h2>DFS hoạt động thế nào?</h2><p>DFS đi vào một ô, đánh dấu đã thăm rồi tiếp tục theo một hướng. Khi hết ô hợp lệ, hàm quay về ô trước để thử nhánh khác.</p></div></div>
+      <div class="concepts">
+        <article class="concept"><div class="concept-visual"><div class="mini-map"><span class="s">S</span><span class="v">1</span><span class="v">2</span><span class="wall"></span><span></span><span class="v">3</span><span class="wall"></span><span></span><span class="on">4</span></div></div><h3>Thăm ô</h3><p>Từ S, chọn ô kề chưa thăm và đánh dấu nó.</p></article>
+        <article class="concept"><div class="concept-visual"><div class="mini-map"><span class="s">S</span><span class="v">1</span><span class="v">2</span><span class="wall"></span><span class="wall"></span><span class="v">3</span><span></span><span></span><span class="on">4</span></div><span class="concept-arrow">↘</span></div><h3>Đi sâu</h3><p>Tiếp tục trên cùng nhánh, chưa vội sang nhánh khác.</p></article>
+        <article class="concept"><div class="concept-visual"><div class="mini-map"><span class="s">S</span><span class="v">1</span><span class="v">2</span><span class="wall"></span><span class="wall"></span><span class="back">↶</span><span></span><span class="wall"></span><span class="wall"></span></div></div><h3>Quay lui</h3><p>Hết đường thì quay về để thử hướng còn lại.</p></article>
       </div>
-      <div class="concept-strip"><div class="concept-icon">⌘</div><div><strong>DFS khác BFS ở đâu?</strong><p>DFS ưu tiên đi sâu theo một nhánh, thường dùng đệ quy hoặc stack. BFS ưu tiên từng lớp, dùng queue và tìm được đường ngắn nhất trên lưới không trọng số.</p></div><div class="concept-tags"><span>DFS = Stack</span><span>BFS = Queue</span></div></div>
+      <p class="complexity-note"><strong>Cần nhớ:</strong> Mảng <code>daTham</code> giúp không đi lặp. Với <code>n × m</code> ô, thời gian là <code>O(n × m)</code>. DFS không đảm bảo đường ngắn nhất.</p>
     </section>
 
-    <section class="practice-section page-container" id="practice">
-      <div class="section-title-row"><div><div class="section-kicker">03 / LUYỆN TẬP</div><h2>Đến lượt bạn thử sức</h2><p>Thực hành trên bản đồ thật, rồi tự kiểm tra kiến thức.</p></div></div>
-      <div class="challenge-grid">
-        <article class="challenge-card"><div class="challenge-top"><span class="challenge-tag">CƠ BẢN</span><span class="challenge-emoji" aria-hidden="true">✳</span></div><h3>01. Tìm được đường tới đích</h3><p>Mở mê cung, chạy DFS cho đến khi thấy đường đi từ S tới E.</p><button data-challenge="find" class="challenge-button">Thử thách này <span>↗</span></button></article>
-        <article class="challenge-card"><div class="challenge-top"><span class="challenge-tag">THỰC HÀNH</span><span class="challenge-emoji" aria-hidden="true">▦</span></div><h3>02. Chặn mọi lối đi</h3><p>Tự thêm tường để DFS không thể đi từ S đến E. Kiểm tra kết quả.</p><button data-challenge="block" class="challenge-button">Thử thách này <span>↗</span></button></article>
-        <article class="challenge-card"><div class="challenge-top"><span class="challenge-tag">NÂNG CAO</span><span class="challenge-emoji" aria-hidden="true">◎</span></div><h3>03. Đếm số hòn đảo</h3><p>Đếm số vùng ô trống liên thông theo 4 hướng. Mỗi vùng là một đảo.</p><button data-challenge="islands" class="challenge-button">Thử thách này <span>↗</span></button></article>
-      </div>
-      <div class="challenge-workspace" id="challengeWorkspace" hidden><div><strong id="challengeHeading">Thử thách</strong><p id="challengeInstruction"></p></div><div class="challenge-input-area"><label for="islandGuess" id="guessLabel" hidden>Dự đoán số đảo <input id="islandGuess" type="number" min="0" max="99" placeholder="?" /></label><button id="checkChallengeBtn" class="btn btn-primary">Kiểm tra kết quả</button></div><p id="challengeFeedback" class="challenge-feedback" aria-live="polite"></p></div>
-
-      <div class="quiz-wrap"><div class="quiz-title"><div><span class="heading-kicker">KIỂM TRA NHANH</span><h3>3 câu hỏi về DFS</h3><p>Chọn một đáp án ở mỗi câu để nhận giải thích.</p></div><div class="quiz-score">Điểm <strong id="quizScore">0/3</strong></div></div>
-        <div class="quiz-list">
-          <article class="quiz-card" data-question="0"><div class="question-label">CÂU 1</div><h4>Khi DFS đi vào ngõ cụt, chuyện gì xảy ra?</h4><div class="quiz-options"><button data-answer="0">Dừng hẳn thuật toán</button><button data-answer="1">Quay về ô trước để thử hướng khác</button><button data-answer="2">Bắt đầu lại từ ô đầu tiên</button></div><p class="quiz-feedback" aria-live="polite"></p></article>
-          <article class="quiz-card" data-question="1"><div class="question-label">CÂU 2</div><h4>Vì sao phải đánh dấu các ô đã thăm?</h4><div class="quiz-options"><button data-answer="0">Để tránh lặp vô hạn giữa các ô</button><button data-answer="1">Để DFS luôn tìm đường ngắn nhất</button><button data-answer="2">Để giảm số hàng của ma trận</button></div><p class="quiz-feedback" aria-live="polite"></p></article>
-          <article class="quiz-card" data-question="2"><div class="question-label">CÂU 3</div><h4>DFS đi trên ma trận n × m, mỗi ô thăm tối đa một lần. Độ phức tạp thời gian là?</h4><div class="quiz-options"><button data-answer="0">O(n + m)</button><button data-answer="1">O(n² × m²)</button><button data-answer="2">O(n × m)</button></div><p class="quiz-feedback" aria-live="polite"></p></article>
-        </div>
-        <div class="quiz-bottom"><span id="quizMessage">Chưa có câu nào được trả lời.</span><button id="resetQuizBtn">Làm lại bài kiểm tra ↺</button></div>
+    <section id="applications" class="apps-section">
+      <div class="section-head"><div><h2>DFS dùng để làm gì?</h2><p>Thử ngay trên ba ví dụ gần với bài tập lập trình.</p></div></div>
+      <div class="app-grid">
+        <article class="app-card">
+          <div class="app-heading"><span class="app-index">01</span><h3>Thoát mê cung</h3></div>
+          <p>Thử đi từ S tới E qua các ô không bị chặn.</p>
+          <div id="mazePreview" class="app-preview maze-preview" aria-label="Minh họa đường qua mê cung"></div>
+          <button id="openMazeBtn" class="app-action">Thử trên bản đồ <span>↗</span></button>
+        </article>
+        <article class="app-card">
+          <div class="app-heading"><span class="app-index">02</span><h3>Loang màu</h3></div>
+          <p>Chạm vào một ô. DFS tô các ô cùng màu nối liền.</p>
+          <div id="paintBoard" class="app-preview paint-board" role="group" aria-label="Tô loang theo vùng màu"></div>
+          <div class="app-bottom"><span id="paintResult">Chọn một ô để tô</span><button id="paintResetBtn" aria-label="Đặt lại bản đồ màu">Làm lại ↺</button></div>
+        </article>
+        <article class="app-card">
+          <div class="app-heading"><span class="app-index">03</span><h3>Đếm số đảo</h3></div>
+          <p>Mỗi nhóm ô đất nối 4 hướng là một đảo.</p>
+          <div id="islandBoard" class="app-preview island-board" aria-label="Minh họa các đảo trên biển"></div>
+          <div class="app-bottom"><strong id="islandResult">? đảo</strong><button id="countIslandsBtn">Đếm bằng DFS →</button></div>
+        </article>
       </div>
     </section>
-  </main>
-  <footer class="site-footer"><div class="page-container footer-inner"><span class="footer-brand">DFS<span>visual lab</span></span><p>Học từ trực quan, hiểu đến bản chất. © <span id="currentYear">2026</span></p><a href="#home">Về đầu trang ↑</a></div></footer>
+
+    <section id="practice" class="practice-section">
+      <div class="section-head"><div><h2>Tự làm thử</h2><p>Không cần viết code trước. Hãy đoán, thử và kiểm tra.</p></div></div>
+      <div class="exercise-list">
+        <article class="exercise"><div class="exercise-num">01</div><div><h3>Ô tiếp theo là ô nào?</h3><p>Xem bước đầu rồi nhấn vào ô bạn nghĩ DFS sẽ đi tiếp.</p></div><button data-challenge="predict">Làm bài ↗</button></article>
+        <article class="exercise"><div class="exercise-num">02</div><div><h3>Chặn mọi đường tới E</h3><p>Đặt thêm tường để S không thể tới E.</p></div><button data-challenge="block">Làm bài ↗</button></article>
+        <article class="exercise"><div class="exercise-num">03</div><div><h3>Có bao nhiêu vùng?</h3><p>Đếm các nhóm ô trống nối nhau theo 4 hướng.</p></div><button data-challenge="islands">Làm bài ↗</button></article>
+      </div>
+      <div id="challengePanel" class="challenge-panel" hidden>
+        <div><strong id="challengeTitle">Bài tập</strong><p id="challengeInstructions"></p></div>
+        <div class="challenge-controls"><label id="guessLabel" for="islandGuess" hidden>Đáp án <input type="number" min="0" max="99" id="islandGuess" placeholder="Số vùng"></label><button id="checkChallengeBtn">Kiểm tra</button></div>
+        <p id="challengeFeedback" class="feedback" aria-live="polite"></p>
+      </div>
+    </section>
+  </div>
+</main>
+<footer><div class="shell footer-row"><span>DFS Lab</span><div>Tham khảo cách trực quan hóa từ <a href="https://visualgo.net/en/dfsbfs" target="_blank" rel="noopener noreferrer">VisuAlgo</a> và <a href="https://entcs.org/tools/graph-traversal-visualizer" target="_blank" rel="noopener noreferrer">EntCS</a>.</div><a href="#home">Lên đầu ↑</a></div></footer>
 </body>
 </html>
