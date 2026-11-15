@@ -328,7 +328,7 @@ function renderInspector(frame) {
   else if(state.stepIndex){status.textContent="Đang khám phá";status.classList.add("busy");}
   else status.textContent="Sẵn sàng";
   $("playLabel").textContent=state.isPlaying?"Tạm dừng":final?"Chạy lại":state.stepIndex?"Tiếp tục":"Chạy DFS";
-  $("playIcon").textContent=state.isPlaying?"Ⅱ":"▶";
+  $("playIcon").innerHTML=state.isPlaying?'<svg class="ui-icon"><use href="#ic-pause"></use></svg>':'<svg class="ui-icon"><use href="#ic-play"></use></svg>';
   $("prevBtn").disabled=state.stepIndex===0;
   $("nextBtn").disabled=final;
   const result=$("resultBox");
@@ -680,7 +680,7 @@ function showView(name,updateHash=false) {
   });
 }
 function setMobilePanel(which){
-  const value=which==="explain"?"explain":"map";
+  const value=["map","explain","code"].includes(which)?which:"map";
   const workspace=document.querySelector(".workspace");
   if(workspace)workspace.dataset.activePanel=value;
   document.querySelectorAll("[data-mobile-panel]").forEach(button=>{
@@ -688,6 +688,8 @@ function setMobilePanel(which){
     button.classList.toggle("active",on);
     button.setAttribute("aria-pressed",String(on));
   });
+  if(value==="code") window.DFSInspector?.select("code");
+  else if(value==="explain") window.DFSInspector?.select("explain");
   if(value==="map")requestAnimationFrame(()=>{
     fitBoardToHeight();
     if(state.trace)drawRoutes(state.trace.steps[state.stepIndex]);

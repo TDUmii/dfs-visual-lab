@@ -145,20 +145,6 @@
     }));
   }
 
-  function toggleCode() {
-    openedCode = !openedCode;
-    const details = $("codeDetails");
-    const btn = $("showCodePanelBtn");
-    details.hidden = !openedCode;
-    btn.textContent = openedCode ? "Ẩn code" : "Mở code";
-    btn.setAttribute("aria-expanded", String(openedCode));
-    const panel = $("inspectorPanel");
-    panel.classList.toggle("has-code", openedCode);
-    if (openedCode && window.DFSCode) {
-      window.DFSCode.highlight(state.trace.steps[state.stepIndex]);
-    }
-  }
-
   function init() {
     reset();
     $("presetMobile").addEventListener("change", (event) => {
@@ -175,7 +161,6 @@
     $("manualResetBtn").addEventListener("click", reset);
     $("watchDfsBtn").addEventListener("click", goToDemo);
     $("watchDfsQuickBtn").addEventListener("click", goToDemo);
-    $("showCodePanelBtn").addEventListener("click", toggleCode);
     document.addEventListener("keydown", (event) => {
       if (activeView !== "learn" || event.altKey || event.ctrlKey || event.metaKey) return;
       const activeTag = document.activeElement?.tagName || "";

@@ -10,11 +10,30 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="compact-layout.css">
   <link rel="stylesheet" href="lesson-v5.css">
+  <link rel="stylesheet" href="refine-v6.css">
   <script defer src="code-languages.js"></script>
   <script defer src="app.js"></script>
   <script defer src="lesson-v5.js"></script>
+  <script defer src="code-teacher.js"></script>
 </head>
 <body>
+<svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+ <symbol id="ic-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></symbol>
+ <symbol id="ic-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+ <symbol id="ic-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-7-7 7 7-7 7"/></symbol>
+ <symbol id="ic-back" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></symbol>
+ <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 9a7 7 0 0 1 12-2l2 5M4 12l2 5a7 7 0 0 0 12-2"/></symbol>
+ <symbol id="ic-code" viewBox="0 0 24 24"><path d="m8 8-4 4 4 4m8-8 4 4-4 4M14 5l-4 14"/></symbol>
+ <symbol id="ic-book" viewBox="0 0 24 24"><path d="M12 5v15m0-15C8 3 5 4 3 5v14c3-1 6-1 9 1m0-15c4-2 7-1 9 0v14c-3-1-6-1-9 1"/></symbol>
+ <symbol id="ic-map" viewBox="0 0 24 24"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Zm6-3v15m6-12v15"/></symbol>
+ <symbol id="ic-bulb" viewBox="0 0 24 24"><path d="M9 18h6m-5 3h4M9 14a7 7 0 1 1 6 0l-1 4h-4l-1-4Z"/></symbol>
+ <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></symbol>
+ <symbol id="ic-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
+ <symbol id="ic-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5Zm-9 10 9 5 9-5M3 17l9 5 9-5"/></symbol>
+ <symbol id="ic-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 5 2l-2 2v1m0 4h.01"/></symbol>
+ <symbol id="ic-terminal" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="3"/><path d="m6 8 4 4-4 4m6 0h6"/></symbol>
+ <symbol id="ic-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+</svg>
 <header class="site-head">
   <div class="shell head-row">
     <a href="#home" class="logo" data-open-view="lab"><span class="logo-mark"><i></i><i></i><i></i><i></i></span><strong>DFS Lab</strong><span class="brand-subtitle">Ma trận 2 chiều</span></a>
@@ -31,10 +50,10 @@
 
 
     <nav class="view-tabs" role="tablist" aria-label="Chọn phần học">
-      <button class="view-tab active" data-view="learn" role="tab" aria-selected="true" aria-controls="learn">01. Bắt đầu</button>
-      <button class="view-tab" data-view="lab" role="tab" aria-selected="false" aria-controls="lab">02. Xem DFS</button>
-      <button class="view-tab" data-view="applications" role="tab" aria-selected="false" aria-controls="applications">03. Ứng dụng</button>
-      <button class="view-tab" data-view="practice" role="tab" aria-selected="false" aria-controls="practice">04. Bài tập</button>
+      <button class="view-tab active" data-view="learn" role="tab" aria-selected="true" aria-controls="learn"><svg class="ui-icon"><use href="#ic-book"></use></svg>Bắt đầu</button>
+      <button class="view-tab" data-view="lab" role="tab" aria-selected="false" aria-controls="lab"><svg class="ui-icon"><use href="#ic-map"></use></svg>Xem DFS</button>
+      <button class="view-tab" data-view="applications" role="tab" aria-selected="false" aria-controls="applications"><svg class="ui-icon"><use href="#ic-layers"></use></svg>Ứng dụng</button>
+      <button class="view-tab" data-view="practice" role="tab" aria-selected="false" aria-controls="practice"><svg class="ui-icon"><use href="#ic-check"></use></svg>Bài tập</button>
     </nav>
 
     <section id="lab" class="workspace-section" role="tabpanel" data-view-panel="lab">
@@ -47,8 +66,9 @@
       <div class="lab-purpose"><span class="purpose-mark">MỤC TIÊU</span> Đi từ <b>S</b> tới <b>E</b>. DFS thử một hướng, đánh dấu ô đã qua và quay về khi hết lối.</div>
       <div class="workspace" data-active-panel="map">
         <div class="mobile-view-switch" role="group" aria-label="Chế độ hiển thị">
-          <button data-mobile-panel="map" class="active" aria-pressed="true">▦ Bản đồ</button>
-          <button data-mobile-panel="explain" aria-pressed="false">◎ DFS giải thích</button>
+          <button data-mobile-panel="map" class="active" aria-pressed="true"><svg class="ui-icon"><use href="#ic-map"></use></svg>Bản đồ</button>
+          <button data-mobile-panel="explain" aria-pressed="false"><svg class="ui-icon"><use href="#ic-bulb"></use></svg>Giải thích</button>
+          <button data-mobile-panel="code" aria-pressed="false"><svg class="ui-icon"><use href="#ic-code"></use></svg>Code</button>
         </div>
         <div class="map-column">
           <div class="preset-bar" role="group" aria-label="Chọn bản đồ">
@@ -67,7 +87,7 @@
             <button data-preset="deadend" class="preset">Ngõ cụt</button>
             <button data-preset="islands" class="preset">Nhiều vùng</button>
             <button data-preset="blank" class="preset">Trống</button>
-            <button id="randomBtn" class="preset random-preset" title="Tạo bản đồ ngẫu nhiên">⤨ Ngẫu nhiên</button>
+            <button id="randomBtn" class="preset random-preset" title="Tạo bản đồ ngẫu nhiên"><svg class="ui-icon"><use href="#ic-refresh"></use></svg> Ngẫu nhiên</button>
           </div>
           <div class="mobile-decision" id="mobileDecision" role="status" aria-live="polite">Bắt đầu tại S. Mỗi lần máy sẽ thử một ô gần nó.</div>
           <div class="board-caption"><strong>Bản đồ <span id="mapSize">7 × 9</span></strong><span id="mobileRunSummary">Chạm ô để chỉnh sửa</span></div>
@@ -90,10 +110,14 @@
               <button data-tool="start" class="edit-tool" aria-pressed="false"><span class="tool-icon green-tool"></span>Đặt S</button>
               <button data-tool="goal" class="edit-tool" aria-pressed="false"><span class="tool-icon orange-tool"></span>Đặt E</button>
             </div>
-            <button id="resetMapBtn" class="reset-map" title="Khôi phục bản đồ">↺</button>
+            <button id="resetMapBtn" class="reset-map" title="Khôi phục bản đồ" aria-label="Khôi phục bản đồ"><svg class="ui-icon"><use href="#ic-refresh"></use></svg></button>
           </div>
         </div>
         <aside class="info-column" id="inspectorPanel">
+          <div class="inspector-tabs" role="group" aria-label="Nội dung giải thích">
+            <button type="button" class="active" data-inspector-tab="explain" aria-pressed="true"><svg class="ui-icon"><use href="#ic-bulb"></use></svg>Vì sao?</button>
+            <button type="button" data-inspector-tab="code" aria-pressed="false"><svg class="ui-icon"><use href="#ic-code"></use></svg>Học viết code</button>
+          </div>
           <div class="info-top"><h3>Vì sao DFS làm vậy?</h3><span id="runStatus" class="run-status">Sẵn sàng</span></div>
           <div class="action-callout">
             <div id="eventIcon" class="event-icon">↳</div>
@@ -103,11 +127,28 @@
           <div class="stats"><div><strong id="visitedCount">0</strong><span>Ô đã thăm</span></div><div><strong id="depthCount">0</strong><span>Độ sâu</span></div><div><strong id="backtrackCount">0</strong><span>Quay lui</span></div></div>
           <div class="stack-top"><strong>Đường đang đi</strong><span id="stackCount">0 ô</span></div>
           <div id="stackVisual" class="stack-visual" aria-live="polite"><span>Chưa có ô nào</span></div>
-          <div class="code-head">
+          <div class="code-head legacy-code-head">
             <strong>Xem code khi đã hiểu cách đi</strong>
             <button type="button" class="code-toggle" id="showCodePanelBtn" aria-controls="codeDetails" aria-expanded="false">Mở code</button>
           </div>
           <div class="code-details" id="codeDetails" hidden>
+            <div class="code-mode-switch" role="group" aria-label="Cách học code">
+              <button type="button" class="active" data-code-mode="build" aria-pressed="true"><svg class="ui-icon"><use href="#ic-layers"></use></svg>Xây từng phần</button>
+              <button type="button" data-code-mode="run" aria-pressed="false"><svg class="ui-icon"><use href="#ic-play"></use></svg>Code đang chạy</button>
+            </div>
+            <section class="code-teaching-card" aria-live="polite">
+              <div class="code-teach-top"><span id="codeStageCounter">Phần 1 / 6</span><span id="codeCurrentContext">DFS bắt đầu từ S</span></div>
+              <h3 id="codeStageTitle">Đầu tiên cần một hàm</h3>
+              <p id="codeStageExplanation">Nhận hàng và cột của ô muốn xét.</p>
+              <div class="code-stage-navigation">
+                <button type="button" id="codePrevStage" aria-label="Phần code trước"><svg class="ui-icon"><use href="#ic-back"></use></svg>Trước</button>
+                <button type="button" id="codeNextStage">Thêm phần tiếp <svg class="ui-icon"><use href="#ic-arrow"></use></svg></button>
+              </div>
+            </section>
+            <div class="code-workbench-head">
+              <strong id="codeWorkbenchLabel">Từng dòng sẽ được thêm bên dưới</strong>
+              <span class="code-file-label" id="codeFileLabel">dfs.py</span>
+            </div>
             <div class="language-switch" role="group" aria-label="Ngôn ngữ lập trình">
               <button type="button" data-language="python" class="active" aria-pressed="true">Python</button>
               <button type="button" data-language="cpp" aria-pressed="false">C++</button>
@@ -121,12 +162,13 @@
             </div>
           </div>
           <div id="pseudoCode" class="code-box" role="region" aria-label="Mã DFS Python hoặc C++" tabindex="0"></div>
+          <div class="code-line-note" id="codeLineNote">Nhấn vào một dòng code để xem tại sao cần dòng đó.</div>
           </div>
           <p class="tiny-hint">Tím: nhánh đang thử. Xám: nhánh đã quay lui.</p>
           <div id="resultBox" class="result" hidden></div>
         </aside>
         <div class="playbar">
-          <div class="buttons"><button id="playBtn" class="play-main"><span id="playIcon">▶</span> <span id="playLabel">Chạy DFS</span></button><button id="prevBtn" class="step-btn" aria-label="Lùi một bước">←</button><button id="nextBtn" class="step-btn">Bước tiếp theo →</button><button id="resetTraceBtn" class="step-btn" aria-label="Chạy từ đầu">↺</button></div>
+          <div class="buttons"><button id="playBtn" class="play-main"><span id="playIcon"><svg class="ui-icon"><use href="#ic-play"></use></svg></span> <span id="playLabel">Chạy DFS</span></button><button id="prevBtn" class="step-btn" aria-label="Lùi một bước"><svg class="ui-icon"><use href="#ic-back"></use></svg></button><button id="nextBtn" class="step-btn"><svg class="ui-icon"><use href="#ic-arrow"></use></svg>Bước tiếp theo</button><button id="resetTraceBtn" class="step-btn" aria-label="Chạy từ đầu"><svg class="ui-icon"><use href="#ic-refresh"></use></svg></button></div>
           <div class="timeline"><span id="stepLabel">Bước 0 / 0</span><input id="stepSlider" type="range" min="0" max="0" value="0" aria-label="Tua đến bước mô phỏng"></div>
           <details class="lab-settings">
             <summary>Tuỳ chọn <span aria-hidden="true">⌄</span></summary>
