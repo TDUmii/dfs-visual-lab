@@ -291,6 +291,8 @@ function renderInspector(frame) {
     const {r,c}=toCoord(key);tag.textContent=coordText(r,c);stack.appendChild(tag);
   });
   $("stackCount").textContent=frame.stack.length+" ô";
+  const compactStatus=$("mobileRunSummary");
+  if(compactStatus)compactStatus.textContent="Thăm "+frame.counter+" ô · Quay lui "+frame.backtracks;
   document.querySelectorAll("#pseudoCode [data-line]").forEach((line)=>
     line.classList.toggle("current",Number(line.dataset.line)===frame.line));
   const status=$("runStatus");
@@ -414,7 +416,8 @@ function loadChallenge(name){
     state.challengeTarget=state.trace.steps.findIndex((frame,index)=>index>1&&frame.type==="visit");
     render();
   }
-  $("lab").scrollIntoView({behavior:"smooth",block:"start"});
+  showView("lab");
+  setMobilePanel("map");
 }
 function setFeedback(text,kind){
   const box=$("challengeFeedback");
@@ -601,7 +604,7 @@ function bindEvents(){
     if(state.isPlaying){clearTimer();startPlayback();}
   });
   $("openMazeBtn").addEventListener("click",()=>{
-    loadPreset("classic");$("lab").scrollIntoView({behavior:"smooth"});
+    loadPreset("classic");showView("lab");setMobilePanel("map");
   });
   $("paintBoard").addEventListener("click",(event)=>{
     const button=event.target.closest("button");if(button)floodFill(Number(button.dataset.r),Number(button.dataset.c));
@@ -626,4 +629,96 @@ document.addEventListener("DOMContentLoaded",()=>{
   resetPaint();
   makeMazePreview();
   renderIslandPreview(false);
+});
+
+// Active view navigation keeps the page in one viewport.
+let activeView="lab";
+function showView(name,updateHash=false) {
+  const view=["lab","applications","practice","learn"].includes(name)?name:"lab";
+  activeView=view;
+  document.querySelectorAll("[data-view-panel]").forEach(panel=>{
+    panel.hidden=panel.dataset.viewPanel!==view;
+    if(!panel.hidden)panel.scrollTop=0;
+  });
+  document.querySelectorAll("[data-view]").forEach(button=>{
+    const on=button.dataset.view===view;
+    button.classList.toggle("active",on);
+    button.setAttribute("aria-selected",String(on));
+    button.tabIndex=on?0:-1;
+  });
+  if(updateHash)history.replaceState(null,"","#"+view);
+  if(view==="lab")requestAnimationFrame(()=>{
+    fitBoardToHeight();
+    if(state.trace)render();
+  });
+}
+function setMobilePanel(which){
+  const value=which==="explain"?"explain":"map";
+  const workspace=document.querySelector(".workspace");
+  if(workspace)workspace.dataset.activePanel=value;
+  document.querySelectorAll("[data-app-card]").forEach(button=>
+    button.addEventListener("click",()=>{
+      const target=Number(button.dataset.appCard);
+      document.querySelectorAll(".app-card").forEach((card,index)=>
+        card.classList.toggle("active",index===target));
+      document.querySelectorAll("[data-app-card]").forEach(tab=>{
+        const on=Number(tab.dataset.appCard)===target;
+        tab.classList.toggle("active",on);
+        tab.setAttribute("aria-pressed",String(on));
+      });
+    }));
+  document.querySelectorAll("[data-mobile-panel]").forEach(button=>{
+    const on=button.dataset.mobilePanel===value;
+    button.classList.toggle("active",on);
+    button.setAttribute("aria-pressed",String(on));
+  });
+  if(value==="map")requestAnimationFrame(()=>{
+    fitBoardToHeight();
+    if(state.trace)drawRoutes(state.trace.steps[state.stepIndex]);
+  });
+}
+function fitBoardToHeight(){
+  const frame=document.querySelector(".board-frame"),column=document.querySelector(".map-column");
+  if(!frame||!column||activeView!=="lab")return;
+  frame.style.width="100%";
+
+  const axis=document.querySelector(".axis-top"),legend=document.querySelector(".legend");
+  const editor=document.querySelector(".editor");
+  const bottom=column.getBoundingClientRect().bottom;
+  const top=frame.getBoundingClientRect().top;
+  const available=bottom-top-(axis?.offsetHeight||0)-(legend?.offsetHeight||0)-(editor?.offsetHeight||0)-29;
+  const gap=5,axisLeft=22;
+  const widthByHeight=((available-((state.rows-1)*gap))*state.cols/state.rows)+((state.cols-1)*gap)+axisLeft;
+  if(Number.isFinite(widthByHeight)&&widthByHeight>120)
+    frame.style.width=Math.max(window.innerWidth<=400?210:240,Math.min(frame.clientWidth,widthByHeight))+"px";
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  document.body.classList.add("screen-layout");
+  const initial=decodeURIComponent(location.hash.replace("#",""));
+  document.querySelectorAll("[data-view]").forEach(button=>
+    button.addEventListener("click",()=>showView(button.dataset.view,true)));
+  document.querySelectorAll("[data-open-view]").forEach(anchor=>
+    anchor.addEventListener("click",event=>{
+      event.preventDefault();showView(anchor.dataset.openView,true);
+    }));
+  document.querySelectorAll("[data-mobile-panel]").forEach(button=>
+    button.addEventListener("click",()=>setMobilePanel(button.dataset.mobilePanel)));
+  const close=$("closeChallengeBtn");
+  if(close)close.addEventListener("click",()=>{
+    $("challengePanel").hidden=true;
+    state.challenge=null;
+    state.challengeGuess=null;
+    showView("practice",true);
+  });
+  window.addEventListener("hashchange",()=>
+    showView(location.hash.replace("#","")));
+  window.addEventListener("resize",()=>{
+    requestAnimationFrame(()=>{
+      fitBoardToHeight();
+      if(state.trace&&activeView==="lab")
+        drawRoutes(state.trace.steps[state.stepIndex]);
+    });
+  });
+  showView(initial);
+  setMobilePanel("map");
 });

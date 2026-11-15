@@ -32,3 +32,10 @@ Kiểm thử thuật toán:
 - EntCS, Graph traversal visualiser: https://entcs.org/tools/graph-traversal-visualizer
 
 Mọi hình minh họa và mã nguồn trang web được triển khai riêng cho DFS Lab.
+## Giao diện vừa màn hình
+
+- Chuyển giữa Mô phỏng, Ứng dụng, Bài tập và Giải thích bằng tab, không phải cuộn cả trang.
+- Ma trận tự thu nhỏ theo kích thước và chiều cao màn hình.
+- Trên điện thoại có nút Bản đồ / DFS giải thích; nút chạy luôn ở cuối khung.
+- Các ứng dụng có nút chọn từng ví dụ, không cần vuốt tìm.
+- Ở màn hình quá thấp, nội dung cuộn bên trong khu vực tương ứng để vẫn nhìn thấy thanh điều khiển.
