@@ -9,12 +9,13 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="compact-layout.css">
+  <script defer src="code-languages.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
 <header class="site-head">
   <div class="shell head-row">
-    <a href="#home" class="logo"><span class="logo-mark"><i></i><i></i><i></i><i></i></span><strong>DFS Lab</strong></a>
+    <a href="#home" class="logo" data-open-view="lab"><span class="logo-mark"><i></i><i></i><i></i><i></i></span><strong>DFS Lab</strong><span class="brand-subtitle">Ma trận 2 chiều</span></a>
     <nav aria-label="Điều hướng"><a href="#lab" data-open-view="lab">Mô phỏng</a><a href="#applications" data-open-view="applications">Ứng dụng</a><a href="#practice" data-open-view="practice">Bài tập</a></nav>
     <a class="head-cta" href="#lab" data-open-view="lab">Thử ngay <span>↗</span></a>
   </div>
@@ -87,18 +88,22 @@
           <div class="stats"><div><strong id="visitedCount">0</strong><span>Ô đã thăm</span></div><div><strong id="depthCount">0</strong><span>Độ sâu</span></div><div><strong id="backtrackCount">0</strong><span>Quay lui</span></div></div>
           <div class="stack-top"><strong>Đường đang đi</strong><span id="stackCount">0 ô</span></div>
           <div id="stackVisual" class="stack-visual" aria-live="polite"><span>Chưa có ô nào</span></div>
-          <div class="code-top"><strong>Mã giả</strong><span>4 hướng</span></div>
-          <div id="pseudoCode" class="code-box" aria-label="Mã giả DFS">
-            <div data-line="1"><em>1</em><code>bool dfs(int hang, int cot) {</code></div>
-            <div data-line="2"><em>2</em><code>  if (biChan || daTham) return false;</code></div>
-            <div data-line="3"><em>3</em><code>  daTham[hang][cot] = true;</code></div>
-            <div data-line="4"><em>4</em><code>  if (laDich) return true;</code></div>
-            <div data-line="5"><em>5</em><code>  for (oKe : bonHuong) {</code></div>
-            <div data-line="6"><em>6</em><code>    if (dfs(oKe)) return true;</code></div>
-            <div data-line="7"><em>7</em><code>  } return false; // quay lui</code></div>
-            <div data-line="8"><em>8</em><code>}</code></div>
+          <div class="code-head">
+            <strong>Code DFS</strong>
+            <div class="language-switch" role="group" aria-label="Ngôn ngữ lập trình">
+              <button type="button" data-language="python" class="active" aria-pressed="true">Python</button>
+              <button type="button" data-language="cpp" aria-pressed="false">C++</button>
+            </div>
           </div>
-          <p class="tiny-hint">Đường tím là lời gọi đang hoạt động. Khi ngõ cụt, DFS trở lại ô trước.</p>
+          <div class="code-actions-row">
+            <span id="codeHint">Dòng sáng ứng với bước DFS</span>
+            <div class="code-action-buttons">
+              <button type="button" id="codeViewBtn" aria-expanded="false" aria-controls="pseudoCode">Toàn bộ</button>
+              <button type="button" id="copyCodeBtn">Sao chép</button>
+            </div>
+          </div>
+          <div id="pseudoCode" class="code-box" role="region" aria-label="Mã DFS Python hoặc C++" tabindex="0"></div>
+          <p class="tiny-hint">Đường tím đang đi, ô xám đã quay lui.</p>
           <div id="resultBox" class="result" hidden></div>
         </aside>
         <div class="playbar">

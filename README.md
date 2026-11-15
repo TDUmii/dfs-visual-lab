@@ -39,3 +39,11 @@ Mọi hình minh họa và mã nguồn trang web được triển khai riêng ch
 - Trên điện thoại có nút Bản đồ / DFS giải thích; nút chạy luôn ở cuối khung.
 - Các ứng dụng có nút chọn từng ví dụ, không cần vuốt tìm.
 - Ở màn hình quá thấp, nội dung cuộn bên trong khu vực tương ứng để vẫn nhìn thấy thanh điều khiển.
+
+## Mã DFS Python / C++
+
+- Bấm Python hoặc C++ để đổi mã minh họa ngay trong mô phỏng.
+- Dòng mã đang chạy sáng lên theo sự kiện thăm ô, gặp đích và quay lui.
+- Nút Toàn bộ hiện chương trình chạy được với bản đồ, vị trí S/E và thứ tự 4 hướng đang chọn.
+- Nút Sao chép lấy phiên bản đầy đủ để chạy trong Python hoặc trình biên dịch C++.
+- Trên màn hình nhỏ, code tự xuống dòng và cuộn riêng trong panel.

@@ -293,8 +293,7 @@ function renderInspector(frame) {
   $("stackCount").textContent=frame.stack.length+" ô";
   const compactStatus=$("mobileRunSummary");
   if(compactStatus)compactStatus.textContent="Thăm "+frame.counter+" ô · Quay lui "+frame.backtracks;
-  document.querySelectorAll("#pseudoCode [data-line]").forEach((line)=>
-    line.classList.toggle("current",Number(line.dataset.line)===frame.line));
+  window.DFSCode?.highlight(frame);
   const status=$("runStatus");
   const final=state.stepIndex===state.trace.steps.length-1;
   status.className="run-status";
@@ -625,6 +624,7 @@ function bindEvents(){
 
 document.addEventListener("DOMContentLoaded",()=>{
   bindEvents();
+  window.DFSCode?.init(state);
   loadPreset("classic");
   resetPaint();
   makeMazePreview();

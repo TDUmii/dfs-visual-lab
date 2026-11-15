@@ -196,3 +196,113 @@ body.screen-layout .view-hint{display:none}
  body.screen-layout .app-card{display:none;min-width:0;width:100%;min-height:0}
  body.screen-layout .app-card.active{display:block}
 }
+
+/* V4: screen-first study layout, preserve map and code side by side. */
+body.screen-layout .site-head .head-row{height:54px}
+body.screen-layout .site-head{height:54px}
+body.screen-layout main>.shell{height:calc(100dvh - 54px);width:min(1380px,calc(100% - 28px))}
+body.screen-layout .intro,body.screen-layout .lab-head{display:none}
+body.screen-layout .view-tabs{
+  margin:8px 0 8px;padding:3px;min-height:42px;gap:3px;border-radius:9px
+}
+body.screen-layout .view-tab{padding:9px 15px}
+body.screen-layout .workspace{grid-template-columns:minmax(0,1.13fr) minmax(0,.87fr)}
+body.screen-layout .map-column{padding:12px 16px 10px}
+body.screen-layout .info-column{padding:12px 16px;display:flex;flex-direction:column;overflow:hidden}
+body.screen-layout .preset-bar{margin-bottom:8px}
+body.screen-layout .board-caption{margin-bottom:6px}
+body.screen-layout .legend{padding:10px 0}
+body.screen-layout .editor{padding-top:6px}
+body.screen-layout .code-box{flex:1;min-height:134px;max-height:none;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#688981 transparent;overscroll-behavior:contain;font-size:11.5px;line-height:1.7;margin-top:7px;min-width:0}
+body.screen-layout .code-box>div{line-height:1.75}
+body.screen-layout .stack-top{margin-top:10px}
+body.screen-layout .stack-visual{max-height:55px;min-height:35px;padding:6px}
+body.screen-layout .action-callout{padding:10px 12px;min-height:0;margin:10px 0}
+body.screen-layout .action-callout p{line-height:1.35}
+body.screen-layout .stats>div{padding:7px}
+body.screen-layout .info-top h3{font-size:14px}
+body.screen-layout .info-top{min-height:22px}
+body.screen-layout .tiny-hint{margin-top:4px;flex:0 0 auto}
+body.screen-layout .result{margin-top:6px;flex:0 0 auto}
+body.screen-layout .brand-subtitle{font-size:11px;font-weight:600;color:#82948a;margin-left:4px;padding-left:12px;border-left:1px solid #d4e3d9;letter-spacing:0}
+.code-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:13px}
+.code-head>strong{font-size:12px;color:#2b4540;white-space:nowrap}
+.language-switch{display:flex;align-items:center;gap:3px;background:#eaf1ed;padding:3px;border:1px solid #dde8e0;border-radius:8px}
+.language-switch button{font-size:11px;font-weight:800;color:#667b6d;background:transparent;border:0;border-radius:6px;min-height:29px;min-width:58px;padding:5px 10px;transition:background .15s,color .15s}
+.language-switch button:hover{color:#226d55;background:#dae9df}
+.language-switch button.active{background:white;color:#087455;box-shadow:0 2px 6px #243c2915}
+.code-actions-row{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:32px;margin-top:5px}
+.code-actions-row>span{font-size:10px;color:#8c9b93;line-height:1.3;min-width:0}
+.code-action-buttons{display:flex;gap:5px;flex:none}
+.code-action-buttons button{font-size:10px;font-weight:800;white-space:nowrap;color:#24765a;background:#eaf5ec;border:1px solid #cddfd0;padding:6px 10px;border-radius:7px;min-height:30px}
+.code-action-buttons button:hover{background:#d9ecdd}
+.code-action-buttons #copyCodeBtn{background:#187e5f;color:#fff;border-color:#187e5f}
+.code-action-buttons #copyCodeBtn:hover{background:#126a50}
+.code-box>div.current{background:#476a60!important;border-left-color:#9cf1ca!important}
+.code-box .token-keyword{color:#b8ecca;font-weight:600}
+.code-box .token-string{color:#f2cb88}
+.code-box .token-comment{color:#91aa9e;font-style:italic}
+.code-box:focus-visible{outline:2px solid #62b398;outline-offset:2px}
+@media(max-width:1050px){
+ body.screen-layout main>.shell{height:calc(100dvh - 54px)}
+ body.screen-layout .workspace{grid-template-columns:1fr}
+ body.screen-layout .workspace[data-active-panel="explain"]>.info-column{display:flex;flex-direction:column;overflow:hidden}
+ body.screen-layout .workspace[data-active-panel="map"]>.info-column{display:none}
+ body.screen-layout .map-column{padding:10px 13px}
+ body.screen-layout .info-column{padding:10px 13px}
+ body.screen-layout .code-box{min-height:120px}
+}
+@media(max-width:750px){
+ body.screen-layout .site-head .head-row{height:50px}
+ body.screen-layout .site-head{height:50px}
+ body.screen-layout main>.shell{height:calc(100dvh - 50px);width:calc(100% - 20px)}
+ body.screen-layout .brand-subtitle{font-size:10px;padding-left:8px}
+ body.screen-layout .view-tabs{margin:7px 0 7px;min-height:40px}
+ body.screen-layout .view-tab{padding:8px 2px;font-size:11px}
+ body.screen-layout .map-column{padding:9px 10px}
+ body.screen-layout .info-column{padding:9px 12px}
+ body.screen-layout .info-top{min-height:19px}
+ body.screen-layout .action-callout{padding:8px 10px;margin:6px 0}
+ body.screen-layout .stats>div{padding:6px}
+ body.screen-layout .stack-top{margin-top:8px}
+ body.screen-layout .code-head{margin-top:8px}
+ body.screen-layout .code-box{font-size:11.5px;margin-top:5px;line-height:1.6}
+ body.screen-layout .code-box>div{line-height:1.65}
+ body.screen-layout .playbar{padding:8px 10px}
+ body.screen-layout .legend{padding:7px 0}
+}
+@media(max-width:400px){
+ body.screen-layout .brand-subtitle{display:none}
+ body.screen-layout .view-tab{gap:3px;font-size:10.5px}
+ .language-switch button{min-width:55px}
+ body.screen-layout .code-box{font-size:10.5px}
+ body.screen-layout .info-column .tiny-hint{display:none}
+ body.screen-layout .info-column .stack-visual{max-height:44px}
+}
+@media(max-height:650px){
+ body.screen-layout .info-column .tiny-hint{display:none}
+ body.screen-layout .action-callout{padding:6px 9px;margin:6px 0}
+ body.screen-layout .stack-top{margin-top:6px}
+ body.screen-layout .code-head{margin-top:6px}
+}
+@media(prefers-reduced-motion:reduce){
+ .cell.is-current{animation:none}
+ .view-tab,.language-switch button,.btn{transition:none}
+}
+
+@media(min-width:1051px){
+ body.screen-layout .board-frame{max-width:720px}
+}
+@media(max-width:750px){
+ body.screen-layout .code-box>div{
+  white-space:pre-wrap;
+  min-width:0;
+  align-items:flex-start;
+  overflow-wrap:anywhere
+ }
+ body.screen-layout .code-box code{
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  min-width:0
+ }
+}
